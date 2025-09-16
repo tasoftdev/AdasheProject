@@ -1,0 +1,328 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User and Authentication Models
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  role      UserRole @default(MEMBER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  member Member?
+
+  @@map("users")
+}
+
+model Member {
+  id          String       @id @default(cuid())
+  userId      String       @unique
+  firstName   String
+  lastName    String
+  phone       String       @unique
+  email       String       @unique
+  dateOfBirth DateTime?
+  address     String?
+  occupation  String?
+  status      MemberStatus @default(ACTIVE)
+  joinDate    DateTime     @default(now())
+  memberCode  String       @unique
+  avatar      String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contributions Contribution[]
+  loans         Loan[]
+  savings       Saving[]
+  transactions  Transaction[]
+
+  @@map("members")
+}
+
+// Financial Models
+model Contribution {
+  id          String             @id @default(cuid())
+  memberId    String
+  amount      Decimal            @db.Decimal(10, 2)
+  type        ContributionType
+  status      ContributionStatus @default(PENDING)
+  dueDate     DateTime?
+  paidDate    DateTime?
+  method      PaymentMethod
+  reference   String             @unique
+  description String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  // Relations
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@map("contributions")
+}
+
+model Loan {
+  id           String     @id @default(cuid())
+  memberId     String
+  amount       Decimal    @db.Decimal(10, 2)
+  interestRate Decimal    @db.Decimal(5, 2) // Changed from (5,4) to (5,2) to allow rates like 25.50%
+  term         Int // in months
+  status       LoanStatus @default(PENDING)
+  appliedDate  DateTime   @default(now())
+  approvedDate DateTime?
+  startDate    DateTime?
+  endDate      DateTime?
+  purpose      String
+  collateral   String?
+  guarantor    String?
+  monthlyPayment Decimal? @db.Decimal(10, 2)
+  totalPaid    Decimal    @default(0) @db.Decimal(10, 2)
+  balance      Decimal    @db.Decimal(10, 2)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  // Relations
+  member     Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  repayments LoanPayment[]
+
+  @@map("loans")
+}
+
+model LoanPayment {
+  id          String        @id @default(cuid())
+  loanId      String
+  amount      Decimal       @db.Decimal(10, 2)
+  principal   Decimal       @db.Decimal(10, 2)
+  interest    Decimal       @db.Decimal(10, 2)
+  paymentDate DateTime
+  method      PaymentMethod
+  reference   String        @unique
+  status      PaymentStatus @default(COMPLETED)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  loan Loan @relation(fields: [loanId], references: [id], onDelete: Cascade)
+
+  @@map("loan_payments")
+}
+
+model Saving {
+  id            String      @id @default(cuid())
+  memberId      String
+  accountNumber String      @unique
+  accountType   SavingType  @default(REGULAR)
+  balance       Decimal     @default(0) @db.Decimal(10, 2)
+  interestRate  Decimal     @db.Decimal(5, 2) // Changed from (5,4) to (5,2) to allow rates like 25.50%
+  status        SavingStatus @default(ACTIVE)
+  openedDate    DateTime    @default(now())
+  closedDate    DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  member       Member             @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  transactions SavingTransaction[]
+
+  @@map("savings")
+}
+
+model SavingTransaction {
+  id          String              @id @default(cuid())
+  savingId    String
+  type        SavingTransactionType
+  amount      Decimal             @db.Decimal(10, 2)
+  balance     Decimal             @db.Decimal(10, 2)
+  method      PaymentMethod
+  reference   String              @unique
+  description String?
+  status      TransactionStatus   @default(COMPLETED)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  // Relations
+  saving Saving @relation(fields: [savingId], references: [id], onDelete: Cascade)
+
+  @@map("saving_transactions")
+}
+
+model Transaction {
+  id          String            @id @default(cuid())
+  memberId    String?
+  type        TransactionType
+  category    String
+  amount      Decimal           @db.Decimal(10, 2)
+  description String
+  method      PaymentMethod
+  reference   String            @unique
+  status      TransactionStatus @default(COMPLETED)
+  date        DateTime          @default(now())
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // Relations
+  member Member? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  @@map("transactions")
+}
+
+// System Configuration
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+  type  String // STRING, NUMBER, BOOLEAN, JSON
+  group String // GENERAL, FINANCIAL, NOTIFICATION, etc.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+// Enums
+enum UserRole {
+  ADMIN
+  MANAGER
+  MEMBER
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum ContributionType {
+  MONTHLY
+  SPECIAL
+  EMERGENCY
+  PENALTY
+}
+
+enum ContributionStatus {
+  PENDING
+  COMPLETED
+  OVERDUE
+  CANCELLED
+}
+
+enum LoanStatus {
+  PENDING
+  APPROVED
+  ACTIVE
+  COMPLETED
+  REJECTED
+  DEFAULTED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  MOBILE_MONEY
+  CREDIT_CARD
+  DEBIT_CARD
+  CHEQUE
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum SavingType {
+  REGULAR
+  FIXED_DEPOSIT
+  TARGET
+  EMERGENCY
+}
+
+enum SavingStatus {
+  ACTIVE
+  INACTIVE
+  CLOSED
+}
+
+enum SavingTransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  INTEREST
+  PENALTY
+  TRANSFER
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// Cooperative Settings Model
+model CooperativeSettings {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Organization Settings
+  organizationName        String  @default("Adashe Cooperative")
+  registrationNumber      String?
+  address                 String?
+  phone                   String?
+  email                   String?
+  website                 String?
+  establishedDate         DateTime?
+  description             String?
+
+  // Financial Settings
+  currency                String  @default("NGN")
+  minimumSavingsBalance   Float   @default(1000.0)
+  monthlyContribution     Float   @default(5000.0)
+  loanInterestRate        Float   @default(5.0)
+  maxLoanAmount           Float   @default(500000.0)
+  loanTerm                Int     @default(12) // months
+  lateFeeAmount           Float   @default(100.0)
+  withdrawalFee           Float   @default(50.0)
+
+  // System Settings
+  allowAutoLoans          Boolean @default(true)
+  requireLoanGuarantors   Boolean @default(false)
+  maxGuarantors           Int     @default(2)
+  autoCalculateInterest   Boolean @default(true)
+  allowEarlyLoanPayment   Boolean @default(true)
+  enableMemberSelfService Boolean @default(true)
+  maxSavingsWithdrawal    Float   @default(100000.0)
+
+  // Notification Settings
+  emailNotifications      Boolean @default(true)
+  smsNotifications        Boolean @default(false)
+  reminderDaysBefore      Int     @default(3)
+  notifyLoanDue           Boolean @default(true)
+  notifyPaymentReceived   Boolean @default(true)
+  notifyContributionDue   Boolean @default(true)
+  
+  @@map("cooperative_settings")
+}
