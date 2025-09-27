@@ -48,12 +48,203 @@ model Member {
 
   // Relations
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profile       Profile?
   contributions Contribution[]
   loans         Loan[]
   savings       Saving[]
   transactions  Transaction[]
+  payouts       Payout[]
 
   @@map("members")
+}
+
+// Enhanced Profile Model
+model Profile {
+  id        String   @id @default(cuid())
+  memberId  String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Personal Information
+  middleName        String?
+  gender           Gender?
+  maritalStatus    MaritalStatus?
+  nationality      String?
+  stateOfOrigin    String?
+  localGovernment  String?
+  religion         String?
+  bloodGroup       String?
+
+  // Contact Information
+  alternatePhone   String?
+  alternateEmail   String?
+  residentialAddress String?
+  permanentAddress   String?
+  city             String?
+  state            String?
+  postalCode       String?
+  country          String?
+
+  // Professional Information
+  employer         String?
+  jobTitle         String?
+  workAddress      String?
+  workPhone        String?
+  workEmail        String?
+  monthlyIncome    Decimal? @db.Decimal(10, 2)
+  yearsOfExperience Int?
+
+  // Emergency Contact
+  emergencyContactName     String?
+  emergencyContactPhone    String?
+  emergencyContactEmail    String?
+  emergencyContactRelation String?
+  emergencyContactAddress  String?
+
+  // Next of Kin
+  nextOfKinName        String?
+  nextOfKinPhone       String?
+  nextOfKinEmail       String?
+  nextOfKinRelation    String?
+  nextOfKinAddress     String?
+  nextOfKinDateOfBirth DateTime?
+
+  // Banking Information
+  bankName         String?
+  bankAccountName  String?
+  bankAccountNumber String?
+  bankBranch       String?
+  bankSortCode     String?
+  bvn              String? // Bank Verification Number
+
+  // Additional Information
+  languages        String? // JSON array of languages spoken
+  skills           String? // JSON array of skills
+  hobbies          String? // JSON array of hobbies
+  socialMedia      String? // JSON object with social media handles
+  preferredCommunication PreferredCommunication @default(EMAIL)
+
+  // Documents
+  documents        ProfileDocument[]
+
+  // Relations
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+// Profile Documents
+model ProfileDocument {
+  id          String      @id @default(cuid())
+  profileId   String
+  type        DocumentType
+  fileName    String
+  fileUrl     String
+  fileSize    Int?
+  mimeType    String?
+  uploadedAt  DateTime    @default(now())
+  verifiedAt  DateTime?
+  verifiedBy  String?
+  status      DocumentStatus @default(PENDING)
+  expiryDate  DateTime?
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("profile_documents")
+}
+
+// Payout System Models
+model Payout {
+  id          String        @id @default(cuid())
+  memberId    String
+  type        PayoutType
+  category    PayoutCategory
+  amount      Decimal       @db.Decimal(10, 2)
+  description String
+  reason      String?
+  status      PayoutStatus  @default(PENDING)
+  requestedBy String        // User ID who requested the payout
+  approvedBy  String?       // User ID who approved the payout
+  processedBy String?       // User ID who processed the payout
+  
+  // Dates
+  requestDate  DateTime      @default(now())
+  approvedDate DateTime?
+  processedDate DateTime?
+  scheduledDate DateTime?    // For scheduled payouts
+  
+  // Payment Details
+  paymentMethod PaymentMethod
+  bankName      String?
+  accountName   String?
+  accountNumber String?
+  reference     String        @unique
+  
+  // Approvals
+  requiresApproval Boolean    @default(true)
+  approvalLevel   Int        @default(1) // 1, 2, 3 levels of approval
+  approvals       PayoutApproval[]
+  
+  // Additional Details
+  attachments     String?       // JSON array of attachment URLs
+  notes           String?
+  metadata        String?       // JSON for additional data
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@map("payouts")
+}
+
+model PayoutApproval {
+  id        String           @id @default(cuid())
+  payoutId  String
+  level     Int              // Approval level (1, 2, 3)
+  approvedBy String          // User ID
+  status    ApprovalStatus   
+  comments  String?
+  approvedAt DateTime?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  // Relations
+  payout Payout @relation(fields: [payoutId], references: [id], onDelete: Cascade)
+
+  @@unique([payoutId, level])
+  @@map("payout_approvals")
+}
+
+// Payout Templates for common payout types
+model PayoutTemplate {
+  id          String         @id @default(cuid())
+  name        String
+  type        PayoutType
+  category    PayoutCategory
+  description String
+  isActive    Boolean        @default(true)
+  
+  // Default values
+  defaultAmount     Decimal?  @db.Decimal(10, 2)
+  defaultMethod     PaymentMethod?
+  requiresApproval  Boolean   @default(true)
+  approvalLevels    Int       @default(1)
+  
+  // Configuration
+  allowMemberRequest Boolean  @default(false)
+  maxAmount         Decimal?  @db.Decimal(10, 2)
+  minAmount         Decimal?  @db.Decimal(10, 2)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("payout_templates")
 }
 
 // Financial Models
@@ -279,6 +470,95 @@ enum TransactionStatus {
   COMPLETED
   FAILED
   CANCELLED
+}
+
+// Profile Enums
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+  SEPARATED
+}
+
+enum PreferredCommunication {
+  EMAIL
+  SMS
+  PHONE
+  WHATSAPP
+  IN_PERSON
+}
+
+enum DocumentType {
+  NATIONAL_ID
+  DRIVERS_LICENSE
+  PASSPORT
+  VOTERS_CARD
+  BIRTH_CERTIFICATE
+  UTILITY_BILL
+  BANK_STATEMENT
+  EMPLOYMENT_LETTER
+  SALARY_SLIP
+  TAX_CERTIFICATE
+  BVN_SLIP
+  PASSPORT_PHOTO
+  SIGNATURE_SPECIMEN
+  OTHER
+}
+
+enum DocumentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+  REQUIRES_UPDATE
+}
+
+// Payout System Enums
+enum PayoutType {
+  DIVIDEND
+  REFUND
+  LOAN_DISBURSEMENT
+  SAVINGS_WITHDRAWAL
+  EMERGENCY_ASSISTANCE
+  WELFARE_PAYMENT
+  BONUS
+  COMMISSION
+  EXPENSE_REIMBURSEMENT
+  OTHER
+}
+
+enum PayoutCategory {
+  MEMBER_BENEFIT
+  OPERATIONAL
+  EMERGENCY
+  STATUTORY
+  VOLUNTARY
+}
+
+enum PayoutStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PROCESSING
+  COMPLETED
+  CANCELLED
+  FAILED
+  ON_HOLD
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REQUIRES_CHANGES
 }
 
 // Cooperative Settings Model

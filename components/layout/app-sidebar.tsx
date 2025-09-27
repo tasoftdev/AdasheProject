@@ -70,6 +70,11 @@ const menuItems = [
     icon: Receipt,
   },
   {
+    title: "Payouts",
+    url: "/payouts",
+    icon: TrendingUp,
+  },
+  {
     title: "Notifications",
     url: "/notifications",
     icon: Bell,
@@ -77,6 +82,11 @@ const menuItems = [
 ]
 
 const settingsItems = [
+  {
+    title: "Profile",
+    url: "/profile",
+    icon: Users,
+  },
   {
     title: "Settings",
     url: "/settings",
