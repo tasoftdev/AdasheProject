@@ -140,27 +140,27 @@ function DashboardContent() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
+      <div className="space-y-1 sm:space-y-2">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">Dashboard</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Welcome back! Here's what's happening with your cooperative.
         </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <Card key={stat.title}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-              <stat.icon className="h-4 w-4 text-muted-foreground" />
+          <Card key={stat.title} className="border-0 sm:border shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3">
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 truncate">{stat.title}</CardTitle>
+              <stat.icon className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground flex items-center">
-                {stat.trend === "up" && <ArrowUpRight className="h-3 w-3 mr-1 text-green-500" />}
-                {stat.trend === "down" && <ArrowDownRight className="h-3 w-3 mr-1 text-red-500" />}
-                {stat.change}
+            <CardContent className="pt-0">
+              <div className="text-lg sm:text-2xl font-bold text-gray-900 leading-tight">{stat.value}</div>
+              <p className="text-[10px] sm:text-xs text-muted-foreground flex items-center mt-1">
+                {stat.trend === "up" && <ArrowUpRight className="h-3 w-3 mr-1 text-green-500 flex-shrink-0" />}
+                {stat.trend === "down" && <ArrowDownRight className="h-3 w-3 mr-1 text-red-500 flex-shrink-0" />}
+                <span className="truncate">{stat.change}</span>
               </p>
             </CardContent>
           </Card>
@@ -168,111 +168,153 @@ function DashboardContent() {
       </div>
 
       {/* Charts */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
+      <div className="grid gap-4 lg:grid-cols-7">
+        <Card className="lg:col-span-4 border-0 sm:border shadow-sm">
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
               Monthly Trends
             </CardTitle>
           </CardHeader>
-          <CardContent className="pl-2">
-            <MonthlyTrendsChart data={data?.charts?.monthlyTrends || []} />
+          <CardContent className="pl-2 pt-0">
+            <div className="h-64 sm:h-80">
+              <MonthlyTrendsChart data={data?.charts?.monthlyTrends || []} />
+            </div>
           </CardContent>
         </Card>
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <PieChart className="h-5 w-5" />
+        <Card className="lg:col-span-3 border-0 sm:border shadow-sm">
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <PieChart className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
               Portfolio Distribution
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <PortfolioDistributionChart data={data?.charts?.contributionBreakdown || []} />
+          <CardContent className="pt-0">
+            <div className="h-64 sm:h-80">
+              <PortfolioDistributionChart data={data?.charts?.contributionBreakdown || []} />
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Transaction Volume and Savings Growth */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Transaction Volume</CardTitle>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card className="border-0 sm:border shadow-sm">
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-base sm:text-lg">Transaction Volume</CardTitle>
           </CardHeader>
-          <CardContent>
-            <TransactionVolumeChart data={data?.recentTransactions || []} />
+          <CardContent className="pt-0">
+            <div className="h-64 sm:h-80">
+              <TransactionVolumeChart data={data?.recentTransactions || []} />
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Savings Growth</CardTitle>
+        <Card className="border-0 sm:border shadow-sm">
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-base sm:text-lg">Savings Growth</CardTitle>
           </CardHeader>
-          <CardContent>
-            <SavingsGrowthChart data={[]} />
+          <CardContent className="pt-0">
+            <div className="h-64 sm:h-80">
+              <SavingsGrowthChart data={[]} />
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Recent Transactions */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
+      <div className="grid gap-4 lg:grid-cols-7">
+        <Card className="lg:col-span-4 border-0 sm:border shadow-sm">
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-base sm:text-lg">Recent Transactions</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Member</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentTransactions.map((transaction) => (
-                  <TableRow key={transaction.id}>
-                    <TableCell className="font-medium">
-                      {transaction.name}
-                    </TableCell>
-                    <TableCell>{transaction.type}</TableCell>
-                    <TableCell>₦{transaction.amount.toLocaleString()}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          transaction.status === "COMPLETED" ? "default" :
-                          transaction.status === "PENDING" ? "secondary" : "destructive"
-                        }
-                      >
-                        {transaction.status.toLowerCase()}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {transaction.date}
-                    </TableCell>
+          <CardContent className="pt-0">
+            {/* Mobile: Card layout */}
+            <div className="space-y-3 sm:hidden">
+              {recentTransactions.map((transaction) => (
+                <div key={transaction.id} className="bg-gray-50 rounded-lg p-3 space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <p className="font-medium text-sm text-gray-900">{transaction.name}</p>
+                      <p className="text-xs text-gray-600">{transaction.type}</p>
+                    </div>
+                    <Badge
+                      variant={
+                        transaction.status === "COMPLETED" ? "default" :
+                        transaction.status === "PENDING" ? "secondary" : "destructive"
+                      }
+                      className="text-xs"
+                    >
+                      {transaction.status.toLowerCase()}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold text-sm">₦{transaction.amount.toLocaleString()}</span>
+                    <span className="text-xs text-gray-500">{transaction.date}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {/* Desktop: Table layout */}
+            <div className="hidden sm:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Member</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {recentTransactions.map((transaction) => (
+                    <TableRow key={transaction.id}>
+                      <TableCell className="font-medium">
+                        {transaction.name}
+                      </TableCell>
+                      <TableCell>{transaction.type}</TableCell>
+                      <TableCell>₦{transaction.amount.toLocaleString()}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            transaction.status === "COMPLETED" ? "default" :
+                            transaction.status === "PENDING" ? "secondary" : "destructive"
+                          }
+                        >
+                          {transaction.status.toLowerCase()}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {transaction.date}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
+        <Card className="lg:col-span-3 border-0 sm:border shadow-sm">
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-base sm:text-lg">Quick Actions</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <Button className="w-full" variant="outline">
+          <CardContent className="space-y-3 pt-0">
+            <Button className="w-full justify-start" variant="outline" size="sm">
+              <Users className="h-4 w-4 mr-2" />
               Add New Member
             </Button>
-            <Button className="w-full" variant="outline">
+            <Button className="w-full justify-start" variant="outline" size="sm">
+              <DollarSign className="h-4 w-4 mr-2" />
               Record Contribution
             </Button>
-            <Button className="w-full" variant="outline">
+            <Button className="w-full justify-start" variant="outline" size="sm">
+              <CreditCard className="h-4 w-4 mr-2" />
               Process Loan Application
             </Button>
-            <Button className="w-full" variant="outline">
+            <Button className="w-full justify-start" variant="outline" size="sm">
+              <BarChart3 className="h-4 w-4 mr-2" />
               Generate Report
             </Button>
           </CardContent>

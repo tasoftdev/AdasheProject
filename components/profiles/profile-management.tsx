@@ -315,85 +315,117 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
   const completionPercentage = getCompletionPercentage();
 
   return (
-    <div className="container mx-auto p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Profile Management</h1>
-          <p className="text-gray-600 text-sm sm:text-base">
-            {isOwnProfile ? 'Manage your profile information' : `Manage ${profile.member.firstName}'s profile`}
-          </p>
-        </div>
-        <div className="flex items-center space-x-4">
-          <div className="text-left sm:text-right">
-            <p className="text-sm text-gray-600">Profile Completion</p>
-            <div className="flex items-center space-x-2">
-              <div className="w-20 sm:w-24 bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${completionPercentage}%` }}
-                ></div>
-              </div>
-              <span className="text-sm font-medium">{completionPercentage}%</span>
+    <div className="min-h-screen bg-gray-50 lg:bg-white">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 lg:py-6 max-w-7xl">
+        <div className="flex flex-col space-y-3 sm:space-y-4 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start space-y-3 sm:space-y-0">
+            <div className="flex-1">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">Profile Management</h1>
+              <p className="text-gray-600 text-sm sm:text-base mt-1">
+                {isOwnProfile ? 'Manage your profile information' : `Manage ${profile.member.firstName}'s profile`}
+              </p>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Member Overview Card */}
-      <Card className="mb-6">
-        <CardContent className="p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <Avatar className="h-16 w-16 sm:h-20 sm:w-20 mx-auto sm:mx-0">
-              <AvatarImage src={profile.member.avatar} />
-              <AvatarFallback>
-                {profile.member.firstName[0]}{profile.member.lastName[0]}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 text-center sm:text-left">
-              <h2 className="text-xl sm:text-2xl font-bold">
-                {profile.member.firstName} {profile.middleName} {profile.member.lastName}
-              </h2>
-              <p className="text-gray-600 text-sm sm:text-base">Member Code: {profile.member.memberCode}</p>
-              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 mt-2">
-                <div className="flex items-center justify-center sm:justify-start text-sm text-gray-600">
-                  <Mail className="h-4 w-4 mr-1" />
-                  <span className="truncate">{profile.member.email}</span>
+            <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto">
+              <div className="text-left sm:text-right">
+                <p className="text-xs sm:text-sm text-gray-500 mb-1">Profile Completion</p>
+                <div className="flex items-center space-x-2">
+                  <div className="w-16 sm:w-20 lg:w-24 bg-gray-200 rounded-full h-1.5 sm:h-2">
+                    <div 
+                      className="bg-blue-600 h-1.5 sm:h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${completionPercentage}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium text-blue-600">{completionPercentage}%</span>
                 </div>
-                <div className="flex items-center justify-center sm:justify-start text-sm text-gray-600">
-                  <Phone className="h-4 w-4 mr-1" />
-                  {profile.member.phone}
-                </div>
-                <Badge className={profile.member.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
-                  {profile.member.status}
-                </Badge>
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 gap-1">
-          <TabsTrigger value="personal" className="text-xs sm:text-sm">Personal</TabsTrigger>
-          <TabsTrigger value="contact" className="text-xs sm:text-sm">Contact</TabsTrigger>
-          <TabsTrigger value="professional" className="text-xs sm:text-sm">Work</TabsTrigger>
-          <TabsTrigger value="emergency" className="text-xs sm:text-sm">Emergency</TabsTrigger>
-          <TabsTrigger value="banking" className="text-xs sm:text-sm">Banking</TabsTrigger>
-          <TabsTrigger value="documents" className="text-xs sm:text-sm">Documents</TabsTrigger>
-        </TabsList>
+        {/* Member Overview Card - Mobile Optimized */}
+        <Card className="mb-4 lg:mb-6 border-0 sm:border shadow-sm">
+          <CardContent className="p-4 lg:p-6">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
+              <Avatar className="h-16 w-16 sm:h-18 sm:w-18 lg:h-20 lg:w-20 mx-auto sm:mx-0 ring-2 ring-blue-100">
+                <AvatarImage src={profile.member.avatar} />
+                <AvatarFallback className="bg-blue-100 text-blue-700 font-medium">
+                  {profile.member.firstName[0]}{profile.member.lastName[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 text-center sm:text-left space-y-2">
+                <div>
+                  <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 leading-tight">
+                    {profile.member.firstName} {profile.middleName} {profile.member.lastName}
+                  </h2>
+                  <p className="text-gray-500 text-sm lg:text-base">Member Code: {profile.member.memberCode}</p>
+                </div>
+                <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                  <div className="flex items-center justify-center sm:justify-start text-sm text-gray-600">
+                    <Mail className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="truncate max-w-[200px] sm:max-w-none">{profile.member.email}</span>
+                  </div>
+                  <div className="flex items-center justify-center sm:justify-start text-sm text-gray-600">
+                    <Phone className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span>{profile.member.phone}</span>
+                  </div>
+                  <Badge className={`${profile.member.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} text-xs px-2 py-1`}>
+                    {profile.member.status}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          {/* Mobile-friendly scrollable tabs */}
+          <div className="overflow-x-auto">
+            <TabsList className="inline-flex h-9 sm:h-10 items-center justify-start w-max sm:w-full rounded-md bg-muted p-1 text-muted-foreground">
+              <TabsTrigger value="personal" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 whitespace-nowrap">
+                <User className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Personal</span>
+                <span className="sm:hidden">Info</span>
+              </TabsTrigger>
+              <TabsTrigger value="contact" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 whitespace-nowrap">
+                <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Contact</span>
+                <span className="sm:hidden">Contact</span>
+              </TabsTrigger>
+              <TabsTrigger value="professional" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 whitespace-nowrap">
+                <Briefcase className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Professional</span>
+                <span className="sm:hidden">Work</span>
+              </TabsTrigger>
+              <TabsTrigger value="emergency" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 whitespace-nowrap">
+                <Heart className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Emergency</span>
+                <span className="sm:hidden">Emergency</span>
+              </TabsTrigger>
+              <TabsTrigger value="banking" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 whitespace-nowrap">
+                <Shield className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Banking</span>
+                <span className="sm:hidden">Bank</span>
+              </TabsTrigger>
+              <TabsTrigger value="documents" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 whitespace-nowrap">
+                <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Documents</span>
+                <span className="sm:hidden">Docs</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <TabsContent value="personal" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center text-lg sm:text-xl">
-                    <User className="h-5 w-5 mr-2" />
+            <TabsContent value="personal" className="space-y-3 sm:space-y-4">
+              <Card className="border-0 sm:border shadow-sm">
+                <CardHeader className="pb-3 sm:pb-6">
+                  <CardTitle className="flex items-center text-base sm:text-lg lg:text-xl">
+                    <User className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-blue-600" />
                     Personal Information
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <CardContent className="space-y-3 sm:space-y-4 pt-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
                     <FormField
                       control={form.control}
                       name="middleName"
@@ -1180,15 +1212,22 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
 
             {/* Save Button - Shows on all tabs except documents */}
             {activeTab !== 'documents' && (
-              <div className="flex justify-center sm:justify-end mt-6">
-                <Button type="submit" size="lg" className="w-full sm:w-auto">
-                  Save Profile
-                </Button>
+              <div className="sticky bottom-0 bg-white border-t sm:border-t-0 sm:bg-transparent p-4 sm:p-0 -mx-3 sm:mx-0 mt-6">
+                <div className="flex justify-center sm:justify-end">
+                  <Button 
+                    type="submit" 
+                    size="lg" 
+                    className="w-full sm:w-auto min-w-[120px] h-12 sm:h-10 text-base sm:text-sm font-medium"
+                  >
+                    Save Profile
+                  </Button>
+                </div>
               </div>
             )}
           </form>
         </Form>
-      </Tabs>
+        </Tabs>
+      </div>
     </div>
   );
 }
