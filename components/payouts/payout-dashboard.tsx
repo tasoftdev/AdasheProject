@@ -269,12 +269,13 @@ export default function PayoutDashboard() {
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Payout Management</h1>
-          <p className="text-gray-600 text-sm sm:text-base">Manage member payouts and requests</p>
-        </div>
+    <div className="min-h-screen bg-gray-50 lg:bg-white">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 lg:py-6 max-w-7xl">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-3 sm:space-y-0">
+          <div>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Payout Management</h1>
+            <p className="text-gray-600 text-sm sm:text-base mt-1">Manage member payouts and requests</p>
+          </div>
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
           <DialogTrigger asChild>
             <Button className="w-full sm:w-auto">
@@ -480,72 +481,72 @@ export default function PayoutDashboard() {
         </Dialog>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-        <Card>
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center">
-              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 flex-shrink-0" />
-              <div className="ml-2 sm:ml-4 min-w-0">
-                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Total Payouts</p>
-                <p className="text-lg sm:text-2xl font-bold">{stats.total}</p>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <Card className="border-0 sm:border shadow-sm">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center">
+                <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-blue-600 flex-shrink-0" />
+                <div className="ml-2 sm:ml-3 lg:ml-4 min-w-0">
+                  <p className="text-[10px] sm:text-xs lg:text-sm font-medium text-gray-600 truncate">Total Payouts</p>
+                  <p className="text-sm sm:text-lg lg:text-2xl font-bold text-gray-900">{stats.total}</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center">
-              <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600 flex-shrink-0" />
-              <div className="ml-2 sm:ml-4 min-w-0">
-                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Pending</p>
-                <p className="text-lg sm:text-2xl font-bold">{stats.pending}</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 sm:border shadow-sm">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center">
+                <Clock className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-yellow-600 flex-shrink-0" />
+                <div className="ml-2 sm:ml-3 lg:ml-4 min-w-0">
+                  <p className="text-[10px] sm:text-xs lg:text-sm font-medium text-gray-600 truncate">Pending</p>
+                  <p className="text-sm sm:text-lg lg:text-2xl font-bold text-gray-900">{stats.pending}</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center">
-              <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 flex-shrink-0" />
-              <div className="ml-2 sm:ml-4 min-w-0">
-                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Approved</p>
-                <p className="text-lg sm:text-2xl font-bold">{stats.approved}</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 sm:border shadow-sm">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center">
+                <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-green-600 flex-shrink-0" />
+                <div className="ml-2 sm:ml-3 lg:ml-4 min-w-0">
+                  <p className="text-[10px] sm:text-xs lg:text-sm font-medium text-gray-600 truncate">Approved</p>
+                  <p className="text-sm sm:text-lg lg:text-2xl font-bold text-gray-900">{stats.approved}</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center">
-              <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 flex-shrink-0" />
-              <div className="ml-2 sm:ml-4 min-w-0">
-                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Completed</p>
-                <p className="text-lg sm:text-2xl font-bold">{stats.completed}</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 sm:border shadow-sm">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center">
+                <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-blue-600 flex-shrink-0" />
+                <div className="ml-2 sm:ml-3 lg:ml-4 min-w-0">
+                  <p className="text-[10px] sm:text-xs lg:text-sm font-medium text-gray-600 truncate">Completed</p>
+                  <p className="text-sm sm:text-lg lg:text-2xl font-bold text-gray-900">{stats.completed}</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="col-span-2 sm:col-span-1">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center">
-              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 flex-shrink-0" />
-              <div className="ml-2 sm:ml-4 min-w-0">
-                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Total Amount</p>
-                <p className="text-lg sm:text-2xl font-bold truncate">₦{stats.totalAmount.toLocaleString()}</p>
+            </CardContent>
+          </Card>
+          <Card className="col-span-2 lg:col-span-1 border-0 sm:border shadow-sm">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center">
+                <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-green-600 flex-shrink-0" />
+                <div className="ml-2 sm:ml-3 lg:ml-4 min-w-0">
+                  <p className="text-[10px] sm:text-xs lg:text-sm font-medium text-gray-600 truncate">Total Amount</p>
+                  <p className="text-sm sm:text-lg lg:text-2xl font-bold text-gray-900 truncate">₦{stats.totalAmount.toLocaleString()}</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Filters */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Filters</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Filters */}
+        <Card className="mb-4 sm:mb-6 border-0 sm:border shadow-sm">
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-base sm:text-lg">Filters</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <Select value={filters.status} onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}>
               <SelectTrigger>
                 <SelectValue placeholder="All Statuses" />
@@ -796,6 +797,7 @@ export default function PayoutDashboard() {
           )}
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }

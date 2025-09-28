@@ -43,6 +43,7 @@ import {
   Phone,
   Calendar,
   Loader2,
+  Users,
 } from "lucide-react"
 import { MemberRowSkeleton } from "@/components/ui/skeletons"
 import {
@@ -264,32 +265,32 @@ export default function MembersPage() {
   }, [searchTerm, statusFilter])
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Members</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">Members</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
               Manage your cooperative members and their information.
             </p>
           </div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="w-full sm:w-auto">
                 <UserPlus className="w-4 h-4 mr-2" />
                 Add Member
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+            <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
               <form onSubmit={handleAddMember}>
                 <DialogHeader>
-                  <DialogTitle>Add New Member</DialogTitle>
-                  <DialogDescription>
+                  <DialogTitle className="text-lg sm:text-xl">Add New Member</DialogTitle>
+                  <DialogDescription className="text-sm">
                     Fill in the member details to add them to your cooperative.
                   </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4 px-1">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid gap-3 sm:gap-4 py-4 px-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="firstName">First Name</Label>
                       <Input 
@@ -408,23 +409,28 @@ export default function MembersPage() {
         </div>
 
         {/* Search and Filter */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Member Directory</CardTitle>
+        <Card className="border-0 sm:border shadow-sm">
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="flex items-center justify-between text-base sm:text-lg">
+              <span>Member Directory</span>
+              <Badge variant="outline" className="text-xs">
+                {members.length} {members.length === 1 ? 'member' : 'members'}
+              </Badge>
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center space-x-2 mb-6">
-              <div className="relative flex-1 max-w-sm">
+          <CardContent className="pt-0">
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-2 mb-4 sm:mb-6">
+              <div className="relative flex-1 sm:max-w-sm">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input 
                   placeholder="Search members..." 
-                  className="pl-10"
+                  className="pl-10 w-full"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -436,7 +442,96 @@ export default function MembersPage() {
               </Select>
             </div>
 
-            <div className="rounded-md border">
+            {/* Mobile: Card Layout */}
+            <div className="space-y-3 sm:hidden">
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="bg-gray-50 rounded-lg p-4 animate-pulse">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-2 bg-gray-200 rounded w-1/2"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : members.length === 0 ? (
+                <div className="text-center py-12">
+                  <Users className="w-12 h-12 mx-auto mb-4 opacity-50 text-gray-400" />
+                  <p className="text-base font-medium mb-2">No members found</p>
+                  <p className="text-sm text-gray-600">Try adjusting your search or filter settings</p>
+                </div>
+              ) : (
+                members.map((member) => (
+                  <div key={member.id} className="bg-white border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback className="bg-blue-100 text-blue-700">
+                            {getInitials(member.firstName, member.lastName)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium text-sm">{member.firstName} {member.lastName}</div>
+                          <div className="text-xs text-gray-500 font-mono">{member.memberCode}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="outline" className="text-xs">{getRoleDisplay(member.user.role)}</Badge>
+                        <Badge variant={getStatusVariant(member.status)} className="text-xs">
+                          {member.status}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2 text-xs">
+                      <div className="flex items-center space-x-1 text-gray-600">
+                        <Mail className="w-3 h-3" />
+                        <span className="truncate">{member.email}</span>
+                      </div>
+                      {member.phone && (
+                        <div className="flex items-center space-x-1 text-gray-600">
+                          <Phone className="w-3 h-3" />
+                          <span>{member.phone}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center space-x-1 text-gray-600">
+                        <Calendar className="w-3 h-3" />
+                        <span>Joined {new Date(member.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center pt-2 border-t">
+                      <div className="text-xs text-gray-600">
+                        {member._count.contributions} contributions • {member._count.loans + member._count.savings} accounts
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem>View profile</DropdownMenuItem>
+                          <DropdownMenuItem>Edit member</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => toggleMemberStatus(member.id, member.status)}
+                          >
+                            {member.status === 'ACTIVE' ? 'Deactivate' : 'Activate'} member
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            
+            {/* Desktop: Table Layout */}
+            <div className="hidden sm:block rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -541,22 +636,23 @@ export default function MembersPage() {
             
             {/* Pagination */}
             {pagination.totalPages > 1 && (
-              <div className="flex items-center justify-between mt-4">
-                <div className="text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 space-y-2 sm:space-y-0">
+                <div className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
                   Showing {((pagination.page - 1) * pagination.limit) + 1} to{" "}
                   {Math.min(pagination.page * pagination.limit, pagination.total)} of{" "}
                   {pagination.total} members
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center justify-center space-x-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => fetchMembers(pagination.page - 1)}
                     disabled={pagination.page <= 1 || loading}
+                    className="h-8 px-3"
                   >
                     Previous
                   </Button>
-                  <div className="text-sm">
+                  <div className="text-xs sm:text-sm px-2">
                     Page {pagination.page} of {pagination.totalPages}
                   </div>
                   <Button
@@ -564,6 +660,7 @@ export default function MembersPage() {
                     size="sm"
                     onClick={() => fetchMembers(pagination.page + 1)}
                     disabled={pagination.page >= pagination.totalPages || loading}
+                    className="h-8 px-3"
                   >
                     Next
                   </Button>
