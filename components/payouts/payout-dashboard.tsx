@@ -269,20 +269,20 @@ export default function PayoutDashboard() {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold">Payout Management</h1>
-          <p className="text-gray-600">Manage member payouts and requests</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Payout Management</h1>
+          <p className="text-gray-600 text-sm sm:text-base">Manage member payouts and requests</p>
         </div>
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               New Payout Request
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="w-[95vw] max-w-2xl mx-auto max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create Payout Request</DialogTitle>
               <DialogDescription>
@@ -291,7 +291,7 @@ export default function PayoutDashboard() {
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="memberId"
@@ -342,7 +342,7 @@ export default function PayoutDashboard() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="category"
@@ -421,7 +421,7 @@ export default function PayoutDashboard() {
                   )}
                 />
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="bankName"
@@ -463,15 +463,16 @@ export default function PayoutDashboard() {
                   />
                 </div>
 
-                <div className="flex justify-end space-x-2">
+                <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setShowCreateDialog(false)}
+                    className="w-full sm:w-auto"
                   >
                     Cancel
                   </Button>
-                  <Button type="submit">Create Payout Request</Button>
+                  <Button type="submit" className="w-full sm:w-auto">Create Payout Request</Button>
                 </div>
               </form>
             </Form>
@@ -480,58 +481,58 @@ export default function PayoutDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center">
-              <DollarSign className="h-8 w-8 text-blue-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Payouts</p>
-                <p className="text-2xl font-bold">{stats.total}</p>
+              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 flex-shrink-0" />
+              <div className="ml-2 sm:ml-4 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Total Payouts</p>
+                <p className="text-lg sm:text-2xl font-bold">{stats.total}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center">
-              <Clock className="h-8 w-8 text-yellow-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-2xl font-bold">{stats.pending}</p>
+              <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600 flex-shrink-0" />
+              <div className="ml-2 sm:ml-4 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Pending</p>
+                <p className="text-lg sm:text-2xl font-bold">{stats.pending}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center">
-              <CheckCircle className="h-8 w-8 text-green-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Approved</p>
-                <p className="text-2xl font-bold">{stats.approved}</p>
+              <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 flex-shrink-0" />
+              <div className="ml-2 sm:ml-4 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Approved</p>
+                <p className="text-lg sm:text-2xl font-bold">{stats.approved}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center">
-              <TrendingUp className="h-8 w-8 text-blue-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-2xl font-bold">{stats.completed}</p>
+              <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 flex-shrink-0" />
+              <div className="ml-2 sm:ml-4 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Completed</p>
+                <p className="text-lg sm:text-2xl font-bold">{stats.completed}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
+        <Card className="col-span-2 sm:col-span-1">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center">
-              <DollarSign className="h-8 w-8 text-green-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Amount</p>
-                <p className="text-2xl font-bold">₦{stats.totalAmount.toLocaleString()}</p>
+              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 flex-shrink-0" />
+              <div className="ml-2 sm:ml-4 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Total Amount</p>
+                <p className="text-lg sm:text-2xl font-bold truncate">₦{stats.totalAmount.toLocaleString()}</p>
               </div>
             </div>
           </CardContent>
@@ -544,7 +545,7 @@ export default function PayoutDashboard() {
           <CardTitle>Filters</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Select value={filters.status} onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}>
               <SelectTrigger>
                 <SelectValue placeholder="All Statuses" />
@@ -596,74 +597,132 @@ export default function PayoutDashboard() {
             All payout requests with their current status
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Member</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Request Date</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+        <CardContent className="p-0 sm:p-6">
+          {/* Mobile Card Layout */}
+          <div className="block sm:hidden">
+            <div className="space-y-3 p-4">
               {payouts.map((payout) => (
-                <TableRow key={payout.id}>
-                  <TableCell>
-                    <div>
-                      <p className="font-medium">
-                        {payout.member.firstName} {payout.member.lastName}
-                      </p>
-                      <p className="text-sm text-gray-500">{payout.member.memberCode}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">
-                      {payout.type.replace('_', ' ')}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>₦{payout.amount.toLocaleString()}</TableCell>
-                  <TableCell>
-                    <Badge className={statusColors[payout.status as keyof typeof statusColors]}>
-                      <div className="flex items-center">
-                        {getStatusIcon(payout.status)}
-                        <span className="ml-1">{payout.status}</span>
+                <Card key={payout.id} className="p-4">
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">
+                          {payout.member.firstName} {payout.member.lastName}
+                        </p>
+                        <p className="text-xs text-gray-500">{payout.member.memberCode}</p>
                       </div>
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(payout.requestDate).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedPayout(payout);
-                        setShowDetailsDialog(true);
-                      }}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
+                      <Badge className={statusColors[payout.status as keyof typeof statusColors]}>
+                        <div className="flex items-center">
+                          {getStatusIcon(payout.status)}
+                          <span className="ml-1 text-xs">{payout.status}</span>
+                        </div>
+                      </Badge>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <Badge variant="outline" className="text-xs">
+                          {payout.type.replace('_', ' ')}
+                        </Badge>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-sm">₦{payout.amount.toLocaleString()}</p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(payout.requestDate).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedPayout(payout);
+                          setShowDetailsDialog(true);
+                        }}
+                        className="w-full sm:w-auto"
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Details
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
               ))}
-            </TableBody>
-          </Table>
+            </div>
+          </div>
+
+          {/* Desktop Table Layout */}
+          <div className="hidden sm:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Member</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Request Date</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {payouts.map((payout) => (
+                  <TableRow key={payout.id}>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">
+                          {payout.member.firstName} {payout.member.lastName}
+                        </p>
+                        <p className="text-sm text-gray-500">{payout.member.memberCode}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">
+                        {payout.type.replace('_', ' ')}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>₦{payout.amount.toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Badge className={statusColors[payout.status as keyof typeof statusColors]}>
+                        <div className="flex items-center">
+                          {getStatusIcon(payout.status)}
+                          <span className="ml-1">{payout.status}</span>
+                        </div>
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {new Date(payout.requestDate).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedPayout(payout);
+                          setShowDetailsDialog(true);
+                        }}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
       {/* Payout Details Dialog */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="w-[95vw] max-w-4xl mx-auto max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Payout Details</DialogTitle>
           </DialogHeader>
           {selectedPayout && (
             <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <h3 className="font-semibold mb-2">Basic Information</h3>
                   <div className="space-y-2 text-sm">
@@ -671,7 +730,7 @@ export default function PayoutDashboard() {
                     <p><span className="font-medium">Type:</span> {selectedPayout.type.replace('_', ' ')}</p>
                     <p><span className="font-medium">Category:</span> {selectedPayout.category.replace('_', ' ')}</p>
                     <p><span className="font-medium">Amount:</span> ₦{selectedPayout.amount.toLocaleString()}</p>
-                    <p><span className="font-medium">Status:</span> 
+                    <p className="flex flex-wrap items-center"><span className="font-medium">Status:</span> 
                       <Badge className={`ml-2 ${statusColors[selectedPayout.status as keyof typeof statusColors]}`}>
                         {selectedPayout.status}
                       </Badge>
@@ -687,10 +746,10 @@ export default function PayoutDashboard() {
               {/* Approval Actions */}
               {(session?.user?.role === 'ADMIN' || session?.user?.role === 'MANAGER') && 
                selectedPayout.status === 'PENDING' && (
-                <div className="flex space-x-2">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                   <Button
                     onClick={() => handlePayoutAction(selectedPayout.id, 'approve', 1)}
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />
                     Approve
@@ -698,6 +757,7 @@ export default function PayoutDashboard() {
                   <Button
                     onClick={() => handlePayoutAction(selectedPayout.id, 'reject')}
                     variant="destructive"
+                    className="w-full sm:w-auto"
                   >
                     <XCircle className="h-4 w-4 mr-2" />
                     Reject
@@ -708,10 +768,10 @@ export default function PayoutDashboard() {
               {/* Process Actions */}
               {(session?.user?.role === 'ADMIN' || session?.user?.role === 'MANAGER') && 
                selectedPayout.status === 'APPROVED' && (
-                <div className="flex space-x-2">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                   <Button
                     onClick={() => handlePayoutAction(selectedPayout.id, 'process')}
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
                   >
                     <TrendingUp className="h-4 w-4 mr-2" />
                     Process Payment
@@ -722,10 +782,10 @@ export default function PayoutDashboard() {
               {/* Complete Actions */}
               {(session?.user?.role === 'ADMIN' || session?.user?.role === 'MANAGER') && 
                selectedPayout.status === 'PROCESSING' && (
-                <div className="flex space-x-2">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                   <Button
                     onClick={() => handlePayoutAction(selectedPayout.id, 'complete')}
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />
                     Mark as Completed

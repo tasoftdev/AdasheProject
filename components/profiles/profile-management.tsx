@@ -315,19 +315,19 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
   const completionPercentage = getCompletionPercentage();
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold">Profile Management</h1>
-          <p className="text-gray-600">
+          <h1 className="text-2xl sm:text-3xl font-bold">Profile Management</h1>
+          <p className="text-gray-600 text-sm sm:text-base">
             {isOwnProfile ? 'Manage your profile information' : `Manage ${profile.member.firstName}'s profile`}
           </p>
         </div>
         <div className="flex items-center space-x-4">
-          <div className="text-right">
+          <div className="text-left sm:text-right">
             <p className="text-sm text-gray-600">Profile Completion</p>
             <div className="flex items-center space-x-2">
-              <div className="w-24 bg-gray-200 rounded-full h-2">
+              <div className="w-20 sm:w-24 bg-gray-200 rounded-full h-2">
                 <div 
                   className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${completionPercentage}%` }}
@@ -341,25 +341,25 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
 
       {/* Member Overview Card */}
       <Card className="mb-6">
-        <CardContent className="p-6">
-          <div className="flex items-center space-x-4">
-            <Avatar className="h-20 w-20">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <Avatar className="h-16 w-16 sm:h-20 sm:w-20 mx-auto sm:mx-0">
               <AvatarImage src={profile.member.avatar} />
               <AvatarFallback>
                 {profile.member.firstName[0]}{profile.member.lastName[0]}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold">
+            <div className="flex-1 text-center sm:text-left">
+              <h2 className="text-xl sm:text-2xl font-bold">
                 {profile.member.firstName} {profile.middleName} {profile.member.lastName}
               </h2>
-              <p className="text-gray-600">Member Code: {profile.member.memberCode}</p>
-              <div className="flex items-center space-x-4 mt-2">
-                <div className="flex items-center text-sm text-gray-600">
+              <p className="text-gray-600 text-sm sm:text-base">Member Code: {profile.member.memberCode}</p>
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 mt-2">
+                <div className="flex items-center justify-center sm:justify-start text-sm text-gray-600">
                   <Mail className="h-4 w-4 mr-1" />
-                  {profile.member.email}
+                  <span className="truncate">{profile.member.email}</span>
                 </div>
-                <div className="flex items-center text-sm text-gray-600">
+                <div className="flex items-center justify-center sm:justify-start text-sm text-gray-600">
                   <Phone className="h-4 w-4 mr-1" />
                   {profile.member.phone}
                 </div>
@@ -373,13 +373,13 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
       </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="personal">Personal</TabsTrigger>
-          <TabsTrigger value="contact">Contact</TabsTrigger>
-          <TabsTrigger value="professional">Professional</TabsTrigger>
-          <TabsTrigger value="emergency">Emergency</TabsTrigger>
-          <TabsTrigger value="banking">Banking</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 gap-1">
+          <TabsTrigger value="personal" className="text-xs sm:text-sm">Personal</TabsTrigger>
+          <TabsTrigger value="contact" className="text-xs sm:text-sm">Contact</TabsTrigger>
+          <TabsTrigger value="professional" className="text-xs sm:text-sm">Work</TabsTrigger>
+          <TabsTrigger value="emergency" className="text-xs sm:text-sm">Emergency</TabsTrigger>
+          <TabsTrigger value="banking" className="text-xs sm:text-sm">Banking</TabsTrigger>
+          <TabsTrigger value="documents" className="text-xs sm:text-sm">Documents</TabsTrigger>
         </TabsList>
 
         <Form {...form}>
@@ -387,13 +387,13 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
             <TabsContent value="personal" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-lg sm:text-xl">
                     <User className="h-5 w-5 mr-2" />
                     Personal Information
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="middleName"
@@ -574,13 +574,13 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
             <TabsContent value="contact" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-lg sm:text-xl">
                     <MapPin className="h-5 w-5 mr-2" />
                     Contact Information
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="alternatePhone"
@@ -611,7 +611,7 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
                       control={form.control}
                       name="residentialAddress"
                       render={({ field }) => (
-                        <FormItem className="md:col-span-2">
+                        <FormItem className="sm:col-span-2">
                           <FormLabel>Residential Address</FormLabel>
                           <FormControl>
                             <Textarea {...field} />
@@ -624,7 +624,7 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
                       control={form.control}
                       name="permanentAddress"
                       render={({ field }) => (
-                        <FormItem className="md:col-span-2">
+                        <FormItem className="sm:col-span-2">
                           <FormLabel>Permanent Address</FormLabel>
                           <FormControl>
                             <Textarea {...field} />
@@ -704,13 +704,13 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
             <TabsContent value="professional" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-lg sm:text-xl">
                     <Briefcase className="h-5 w-5 mr-2" />
                     Professional Information
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="employer"
@@ -793,7 +793,7 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
                       control={form.control}
                       name="workAddress"
                       render={({ field }) => (
-                        <FormItem className="md:col-span-2">
+                        <FormItem className="sm:col-span-2">
                           <FormLabel>Work Address</FormLabel>
                           <FormControl>
                             <Textarea {...field} />
@@ -810,15 +810,15 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
             <TabsContent value="emergency" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-lg sm:text-xl">
                     <Heart className="h-5 w-5 mr-2" />
                     Emergency Contact & Next of Kin
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-semibold mb-4">Emergency Contact</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <h3 className="text-base sm:text-lg font-semibold mb-4">Emergency Contact</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <FormField
                         control={form.control}
                         name="emergencyContactName"
@@ -875,7 +875,7 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
                         control={form.control}
                         name="emergencyContactAddress"
                         render={({ field }) => (
-                          <FormItem className="md:col-span-2">
+                          <FormItem className="sm:col-span-2">
                             <FormLabel>Address</FormLabel>
                             <FormControl>
                               <Textarea {...field} />
@@ -888,8 +888,8 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-semibold mb-4">Next of Kin</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <h3 className="text-base sm:text-lg font-semibold mb-4">Next of Kin</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <FormField
                         control={form.control}
                         name="nextOfKinName"
@@ -959,7 +959,7 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
                         control={form.control}
                         name="nextOfKinAddress"
                         render={({ field }) => (
-                          <FormItem className="md:col-span-2">
+                          <FormItem className="sm:col-span-2">
                             <FormLabel>Address</FormLabel>
                             <FormControl>
                               <Textarea {...field} />
@@ -977,13 +977,13 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
             <TabsContent value="banking" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-lg sm:text-xl">
                     <Shield className="h-5 w-5 mr-2" />
                     Banking Information
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="bankName"
@@ -1070,19 +1070,19 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
             <TabsContent value="documents" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center">
+                  <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                    <div className="flex items-center text-lg sm:text-xl">
                       <FileText className="h-5 w-5 mr-2" />
                       Documents
                     </div>
                     <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
                       <DialogTrigger asChild>
-                        <Button>
+                        <Button className="w-full sm:w-auto">
                           <Upload className="h-4 w-4 mr-2" />
                           Upload Document
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="w-[95vw] max-w-md mx-auto">
                         <DialogHeader>
                           <DialogTitle>Upload Document</DialogTitle>
                           <DialogDescription>
@@ -1109,11 +1109,11 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
                             <label className="block text-sm font-medium mb-2">File</label>
                             <Input type="file" accept=".pdf,.jpg,.jpeg,.png" />
                           </div>
-                          <div className="flex justify-end space-x-2">
-                            <Button variant="outline" onClick={() => setShowUploadDialog(false)}>
+                          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
+                            <Button variant="outline" onClick={() => setShowUploadDialog(false)} className="w-full sm:w-auto">
                               Cancel
                             </Button>
-                            <Button disabled={uploadingDoc}>
+                            <Button disabled={uploadingDoc} className="w-full sm:w-auto">
                               {uploadingDoc ? 'Uploading...' : 'Upload'}
                             </Button>
                           </div>
@@ -1126,43 +1126,45 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
                   <div className="space-y-4">
                     {profile.documents && profile.documents.length > 0 ? (
                       profile.documents.map((doc) => (
-                        <div key={doc.id} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div className="flex items-center space-x-3">
-                            <FileText className="h-8 w-8 text-gray-400" />
-                            <div>
-                              <p className="font-medium">{doc.fileName}</p>
-                              <p className="text-sm text-gray-600">{doc.type.replace('_', ' ')}</p>
+                        <div key={doc.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg space-y-3 sm:space-y-0">
+                          <div className="flex items-start sm:items-center space-x-3">
+                            <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400 flex-shrink-0 mt-1 sm:mt-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm sm:text-base truncate">{doc.fileName}</p>
+                              <p className="text-xs sm:text-sm text-gray-600">{doc.type.replace('_', ' ')}</p>
                               <p className="text-xs text-gray-500">
                                 Uploaded: {new Date(doc.uploadedAt).toLocaleDateString()}
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                             <Badge className={getDocumentStatusColor(doc.status)}>
                               {doc.status}
                             </Badge>
-                            {(session?.user?.role === 'ADMIN' || session?.user?.role === 'MANAGER') && 
-                             doc.status === 'PENDING' && (
-                              <div className="flex space-x-1">
-                                <Button
-                                  size="sm"
-                                  onClick={() => verifyDocument(doc.id, 'VERIFIED')}
-                                  className="bg-green-600 hover:bg-green-700"
-                                >
-                                  <CheckCircle className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  onClick={() => verifyDocument(doc.id, 'REJECTED')}
-                                  variant="destructive"
-                                >
-                                  <XCircle className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            )}
-                            <Button size="sm" variant="outline">
-                              <Eye className="h-4 w-4" />
-                            </Button>
+                            <div className="flex items-center space-x-1">
+                              {(session?.user?.role === 'ADMIN' || session?.user?.role === 'MANAGER') && 
+                               doc.status === 'PENDING' && (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => verifyDocument(doc.id, 'VERIFIED')}
+                                    className="bg-green-600 hover:bg-green-700"
+                                  >
+                                    <CheckCircle className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => verifyDocument(doc.id, 'REJECTED')}
+                                    variant="destructive"
+                                  >
+                                    <XCircle className="h-4 w-4" />
+                                  </Button>
+                                </>
+                              )}
+                              <Button size="sm" variant="outline">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       ))
@@ -1178,8 +1180,8 @@ export default function ProfileManagement({ memberId, isOwnProfile = false }: Pr
 
             {/* Save Button - Shows on all tabs except documents */}
             {activeTab !== 'documents' && (
-              <div className="flex justify-end mt-6">
-                <Button type="submit" size="lg">
+              <div className="flex justify-center sm:justify-end mt-6">
+                <Button type="submit" size="lg" className="w-full sm:w-auto">
                   Save Profile
                 </Button>
               </div>
