@@ -33,6 +33,7 @@ import {
   TransactionVolumeChart,
   SavingsGrowthChart 
 } from "@/components/charts"
+import { StreakSummary } from "@/components/streaks/streak-summary"
 import { useDashboard } from "@/hooks/useDashboard"
 
 function DashboardContent() {
@@ -166,6 +167,9 @@ function DashboardContent() {
           </Card>
         ))}
       </div>
+
+      {/* Streak Summary */}
+      <StreakSummary />
 
       {/* Charts */}
       <div className="grid gap-4 lg:grid-cols-7">
