@@ -12,6 +12,7 @@ import {
   Receipt,
   TrendingUp,
   LogOut,
+  Flame,
 } from "lucide-react"
 
 import {
@@ -73,6 +74,11 @@ const menuItems = [
     title: "Payouts",
     url: "/payouts",
     icon: TrendingUp,
+  },
+  {
+    title: "Streaks",
+    url: "/streaks",
+    icon: Flame,
   },
   {
     title: "Notifications",

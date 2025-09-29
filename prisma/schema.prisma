@@ -54,6 +54,12 @@ model Member {
   savings       Saving[]
   transactions  Transaction[]
   payouts       Payout[]
+  
+  // Streak Relations
+  streaks           MemberStreak[]
+  streakActivities  StreakActivity[]
+  achievements      StreakAchievement[]
+  leaderboards      StreakLeaderboard[]
 
   @@map("members")
 }
@@ -561,6 +567,38 @@ enum ApprovalStatus {
   REQUIRES_CHANGES
 }
 
+// Streak System Enums
+enum StreakType {
+  LOGIN
+  CONTRIBUTION
+  SAVINGS
+  LOAN_PAYMENT
+  MEETING_ATTENDANCE
+  PROFILE_UPDATE
+  TRANSACTION
+  COMMUNITY_ENGAGEMENT
+}
+
+enum AchievementType {
+  STREAK_MILESTONE
+  TOTAL_CONTRIBUTION
+  PERFECT_ATTENDANCE
+  EARLY_ADOPTER
+  COMMUNITY_CHAMPION
+  FINANCIAL_DISCIPLINE
+  LOYALTY_BADGE
+  SPECIAL_EVENT
+}
+
+enum LeaderboardPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+  ALL_TIME
+}
+
 // Cooperative Settings Model
 model CooperativeSettings {
   id        String   @id @default(cuid())
@@ -605,4 +643,105 @@ model CooperativeSettings {
   notifyContributionDue   Boolean @default(true)
   
   @@map("cooperative_settings")
+}
+
+// Streak System Models
+model MemberStreak {
+  id               String      @id @default(cuid())
+  memberId         String
+  type             StreakType
+  currentStreak    Int         @default(0)
+  longestStreak    Int         @default(0)
+  lastActivityDate DateTime?
+  startDate        DateTime?   // When current streak started
+  endDate          DateTime?   // When streak was broken (if applicable)
+  isActive         Boolean     @default(true)
+  totalPoints      Int         @default(0)
+  level            Int         @default(1)
+  
+  // Metadata for streak-specific data
+  metadata         Json?       // Additional streak data (e.g., amounts, goals)
+  
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  // Relations
+  member           Member      @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  activities       StreakActivity[]
+  achievements     StreakAchievement[]
+
+  @@unique([memberId, type])
+  @@map("member_streaks")
+}
+
+model StreakActivity {
+  id               String       @id @default(cuid())
+  streakId         String
+  memberId         String
+  activityType     StreakType
+  activityDate     DateTime
+  points           Int          @default(1)
+  description      String?
+  
+  // Activity specific data
+  amount           Decimal?     @db.Decimal(10, 2) // For contribution/savings streaks
+  reference        String?      // Reference to related transaction/record
+  metadata         Json?        // Additional activity data
+  
+  createdAt        DateTime     @default(now())
+
+  // Relations
+  streak           MemberStreak @relation(fields: [streakId], references: [id], onDelete: Cascade)
+  member           Member       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId, activityDate])
+  @@index([streakId, activityDate])
+  @@map("streak_activities")
+}
+
+model StreakAchievement {
+  id               String       @id @default(cuid())
+  streakId         String
+  memberId         String
+  achievementType  AchievementType
+  title            String
+  description      String
+  badgeIcon        String?      // Icon for the achievement badge
+  pointsAwarded    Int          @default(0)
+  achievedAt       DateTime     @default(now())
+  
+  // Achievement criteria met
+  streakCount      Int?         // Streak length achieved
+  totalAmount      Decimal?     @db.Decimal(10, 2) // Total amount for financial achievements
+  
+  createdAt        DateTime     @default(now())
+
+  // Relations
+  streak           MemberStreak @relation(fields: [streakId], references: [id], onDelete: Cascade)
+  member           Member       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@map("streak_achievements")
+}
+
+model StreakLeaderboard {
+  id               String       @id @default(cuid())
+  memberId         String
+  streakType       StreakType
+  currentStreak    Int
+  longestStreak    Int
+  totalPoints      Int
+  rank             Int
+  period           LeaderboardPeriod @default(ALL_TIME)
+  periodStart      DateTime?
+  periodEnd        DateTime?
+  
+  updatedAt        DateTime     @updatedAt
+  createdAt        DateTime     @default(now())
+
+  // Relations
+  member           Member       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, streakType, period])
+  @@index([streakType, period, rank])
+  @@map("streak_leaderboards")
 }

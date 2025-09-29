@@ -24,6 +24,7 @@
 - [Authentication & Authorization](#-authentication--authorization)
 - [Database Schema](#-database-schema)
 - [UI Components](#-ui-components)
+- [Streak System & Gamification](#-streak-system--gamification)
 - [Mobile Responsiveness](#-mobile-responsiveness)
 - [Deployment](#-deployment)
 - [Contributing](#-contributing)
@@ -70,11 +71,19 @@
 - Data encryption and protection
 - Audit trails for all transactions
 
-### 📱 **Modern User Experience**
-- Fully responsive design for all devices
-- Real-time notifications
+### � **User Engagement & Gamification**
+- **Streak System**: Track daily login, contribution, and savings streaks
+- **Achievement System**: Unlock milestones and rewards for consistent activity
+- **Leaderboards**: Daily, weekly, monthly, and all-time rankings
+- **Points & Levels**: Gamified progression system with experience points
+- **Activity Tracking**: Comprehensive logging of user engagement
+
+### �📱 **Modern User Experience**
+- Fully responsive mobile-first design for all devices
+- Real-time notifications and updates
 - Progressive Web App capabilities
 - Intuitive dashboard and navigation
+- Touch-friendly interfaces with optimized mobile layouts
 
 ## 🛠️ Technology Stack
 
@@ -223,7 +232,8 @@ adashe/
 │   │   ├── savings/            # Savings management
 │   │   ├── payouts/            # Payout system API
 │   │   ├── profiles/           # Profile management
-│   │   └── reports/            # Reports and analytics
+│   │   ├── reports/            # Reports and analytics
+│   │   └── streaks/            # Streak system API
 │   ├── auth/                   # Auth pages (signin, signup)
 │   ├── dashboard/              # Dashboard page
 │   ├── members/                # Member pages
@@ -234,6 +244,7 @@ adashe/
 │   ├── profile/                # Profile pages
 │   ├── reports/                # Reports pages
 │   ├── settings/               # Settings pages
+│   ├── streaks/                # Streak & gamification pages
 │   └── layout.tsx              # Root layout
 ├── components/                  # React Components
 │   ├── ui/                     # Base UI components (Shadcn)
@@ -320,6 +331,15 @@ GET    /api/reports/financial-summary   # Financial summary
 GET    /api/reports/member-summary      # Member summary
 GET    /api/reports/monthly            # Monthly reports
 GET    /api/reports/transactions       # Transaction reports
+```
+
+### Streak System
+```
+GET    /api/streaks                    # Get user streaks and stats
+POST   /api/streaks                    # Record streak activity
+GET    /api/streaks/leaderboard        # Get leaderboard rankings
+GET    /api/streaks/achievements       # Get user achievements
+POST   /api/streaks/achievements       # Unlock achievement
 ```
 
 ## 🔐 Authentication & Authorization
@@ -409,6 +429,43 @@ model Payout {
 }
 ```
 
+#### **Streak System**
+```prisma
+model MemberStreak {
+  id            String     @id @default(cuid())
+  memberId      String
+  type          StreakType
+  currentStreak Int        @default(0)
+  longestStreak Int        @default(0)
+  lastActivity  DateTime?
+  totalPoints   Int        @default(0)
+  level         Int        @default(1)
+  member        Member     @relation(fields: [memberId], references: [id])
+  activities    StreakActivity[]
+}
+
+model StreakActivity {
+  id        String      @id @default(cuid())
+  streakId  String
+  type      StreakType
+  points    Int
+  createdAt DateTime    @default(now())
+  streak    MemberStreak @relation(fields: [streakId], references: [id])
+}
+
+model StreakAchievement {
+  id          String          @id @default(cuid())
+  memberId    String
+  type        AchievementType
+  title       String
+  description String
+  points      Int
+  unlockedAt  DateTime        @default(now())
+  metadata    Json?
+  member      Member          @relation(fields: [memberId], references: [id])
+}
+```
+
 ### Key Relationships
 - User → Member (One-to-One)
 - Member → Profile (One-to-One)
@@ -416,6 +473,9 @@ model Payout {
 - Member → Loans (One-to-Many)
 - Member → Savings (One-to-Many)
 - Member → Payouts (One-to-Many)
+- Member → MemberStreaks (One-to-Many)
+- Member → StreakAchievements (One-to-Many)
+- MemberStreak → StreakActivities (One-to-Many)
 - Payout → PayoutApprovals (One-to-Many)
 
 ## 🎨 UI Components
@@ -439,6 +499,57 @@ Built with **Shadcn/ui** components providing:
 - **ProfileManagement**: Comprehensive profile editor
 - **FinancialCharts**: Interactive financial visualizations
 - **MemberCards**: Member information display
+- **StreakDashboard**: Comprehensive gamification interface with streaks, leaderboards, and achievements
+
+## 🔥 Streak System & Gamification
+
+### Gamification Features
+- **Multi-Type Streaks**: Login, Contribution, Savings, and General activity tracking
+- **Dynamic Point System**: Configurable points for different activities (Login: 5pts, Contribution: 20pts, Savings: 15pts)
+- **Level Progression**: Automatic level calculation based on total earned points
+- **Achievement System**: Milestone-based rewards with rich metadata and descriptions
+- **Competitive Leaderboards**: Rankings across multiple time periods
+
+### Streak Types
+```typescript
+enum StreakType {
+  LOGIN       // Daily login streak
+  CONTRIBUTION // Regular contribution streak  
+  SAVINGS     // Savings deposit streak
+  GENERAL     // General platform activity
+}
+```
+
+### Achievement Categories
+```typescript
+enum AchievementType {
+  STREAK_MILESTONE    // Streak length achievements
+  POINTS_MILESTONE    // Total points achievements
+  ACTIVITY_MILESTONE  // Activity count achievements
+  SPECIAL            // Special event achievements
+}
+```
+
+### Leaderboard Periods
+- **Daily**: Today's top performers
+- **Weekly**: This week's leaders
+- **Monthly**: Monthly champions
+- **All Time**: Hall of fame
+
+### Gamification Dashboard
+The StreakDashboard provides:
+- **Overview Tab**: Personal streak stats, current streaks, total points, and level
+- **Leaderboard Tab**: Competitive rankings with user positioning
+- **Achievements Tab**: Unlocked and available achievements with progress tracking
+- **Mobile Responsive**: Fully optimized for all device sizes with touch-friendly interactions
+
+### Integration Points
+Streak activities are automatically tracked for:
+- User login sessions
+- Contribution submissions
+- Savings deposits
+- Profile completions
+- Financial transactions
 
 ## 📱 Mobile Responsiveness
 
@@ -450,11 +561,14 @@ Built with **Shadcn/ui** components providing:
   - `xl`: 1280px and up
 
 ### Mobile Optimizations
-- **Navigation**: Collapsible sidebar on mobile
-- **Tables**: Card-based layout on mobile devices
-- **Forms**: Stacked form layouts for better mobile UX
-- **Dialogs**: Full-screen modals on mobile
-- **Touch Targets**: Appropriately sized for touch interaction
+- **Navigation**: Collapsible sidebar with touch-friendly interactions
+- **Tables**: Responsive card-based layouts on mobile devices
+- **Forms**: Stacked form layouts optimized for mobile input
+- **Dialogs**: Full-screen modals with mobile-specific transitions
+- **Touch Targets**: Appropriately sized buttons and interactive elements
+- **Dashboard Cards**: Mobile-first responsive grid layouts
+- **Streak Interface**: Touch-optimized tabbed navigation and progress indicators
+- **Profile Management**: Mobile-friendly multi-step forms with persistent progress
 
 ### Cross-Device Testing
 - Responsive across all device sizes
