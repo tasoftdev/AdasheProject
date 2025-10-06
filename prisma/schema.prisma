@@ -62,6 +62,8 @@ model Member {
   leaderboards      StreakLeaderboard[]
 
   @@map("members")
+  ConversationParticipant ConversationParticipant[]
+  Message Message[]
 }
 
 // Enhanced Profile Model
@@ -390,6 +392,42 @@ model Setting {
   updatedAt DateTime @updatedAt
 
   @@map("settings")
+}
+
+model Conversation {
+  id          String   @id @default(cuid())
+  type        String   // 'direct' or 'group'
+  name        String?
+  avatar      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+model ConversationParticipant {
+  id             String   @id @default(cuid())
+  conversationId String
+  memberId       String
+  role          String?  // 'ADMIN', 'MODERATOR', 'MEMBER'
+  joinedAt      DateTime @default(now())
+  
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  member       Member      @relation(fields: [memberId], references: [id])
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  senderId       String
+  content        String
+  type          String   @default("text") // 'text', 'image', 'file'
+  status        String   @default("sent") // 'sent', 'delivered', 'read'
+  createdAt     DateTime @default(now())
+  
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  sender       Member      @relation(fields: [senderId], references: [id])
 }
 
 // Enums

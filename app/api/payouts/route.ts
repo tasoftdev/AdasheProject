@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
 
-// GET /api/payouts - Get all payouts with filtering and pagination
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -22,7 +22,6 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    // Build where clause
     const where: any = {};
     
     if (status) where.status = status;
@@ -34,8 +33,6 @@ export async function GET(request: NextRequest) {
       if (startDate) where.requestDate.gte = new Date(startDate);
       if (endDate) where.requestDate.lte = new Date(endDate);
     }
-
-    // If user is not admin, only show their own payouts
     if (session.user.role !== 'ADMIN') {
       const member = await prisma.member.findUnique({
         where: { userId: session.user.id }
@@ -86,8 +83,6 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-
-// POST /api/payouts - Create a new payout request
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -112,15 +107,12 @@ export async function POST(request: NextRequest) {
       notes
     } = body;
 
-    // Validate required fields
     if (!memberId || !type || !category || !amount || !description || !paymentMethod) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
-
-    // Verify member exists
     const member = await prisma.member.findUnique({
       where: { id: memberId }
     });
@@ -132,7 +124,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user can request payout for this member
     if (session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER') {
       const userMember = await prisma.member.findUnique({
         where: { userId: session.user.id }
@@ -146,19 +137,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Generate unique reference
+    
     const reference = `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
-    // Determine approval requirements based on amount and type
+ 
     let requiresApproval = true;
     let approvalLevel = 1;
     
     if (parseFloat(amount) > 100000) {
-      approvalLevel = 2; // Higher amounts need more approvals
+     
     }
     
     if (parseFloat(amount) > 500000) {
-      approvalLevel = 3; // Very high amounts need top-level approval
+ 
     }
 
     const payout = await prisma.payout.create({
@@ -193,7 +184,7 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // Create initial approval records if required
+  
     if (requiresApproval) {
       for (let level = 1; level <= approvalLevel; level++) {
         await prisma.payoutApproval.create({
@@ -201,7 +192,7 @@ export async function POST(request: NextRequest) {
             payoutId: payout.id,
             level,
             status: 'PENDING',
-            approvedBy: '' // Will be filled when someone approves
+            approvedBy: '' 
           }
         });
       }

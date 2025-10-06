@@ -4,7 +4,17 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { z } from 'zod'
 
-// GET /api/savings/accounts - Get all savings accounts
+// Schema for creating savings account
+const createSavingSchema = z.object({
+  memberId: z.string(),
+  accountType: z.enum(['REGULAR', 'FIXED_DEPOSIT', 'TARGET', 'EMERGENCY']),
+  interestRate: z.number().min(0).max(100),
+  initialDeposit: z.number().min(0).optional().default(0),
+  monthlyTarget: z.number().min(0).optional().nullable(),
+  maturityDate: z.string().optional().nullable()
+})
+
+// GET /api/savings/accounts - Get all savings accounts with filtering
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -13,39 +23,58 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const savings = await prisma.saving.findMany({
-      include: {
-        member: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            memberCode: true,
-            avatar: true
-          }
-        },
-        transactions: {
-          orderBy: { createdAt: 'desc' },
-          take: 1,
-          select: {
-            createdAt: true,
-            type: true
-          }
-        },
-        _count: {
-          select: {
-            transactions: {
-              where: {
-                createdAt: {
-                  gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+    const { searchParams } = new URL(request.url)
+    const memberId = searchParams.get('memberId')
+    const accountType = searchParams.get('accountType') as 'REGULAR' | 'FIXED_DEPOSIT' | 'TARGET' | 'EMERGENCY' | null
+    const status = searchParams.get('status') as 'ACTIVE' | 'INACTIVE' | 'MATURED' | 'CLOSED' | null
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '10')
+    const skip = (page - 1) * limit
+
+    const where: any = {}
+    if (memberId) where.memberId = memberId
+    if (accountType) where.accountType = accountType
+    if (status) where.status = status
+
+    const [savings, total] = await Promise.all([
+      prisma.saving.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          member: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              memberCode: true,
+              avatar: true
+            }
+          },
+          transactions: {
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+            select: {
+              createdAt: true,
+              type: true
+            }
+          },
+          _count: {
+            select: {
+              transactions: {
+                where: {
+                  createdAt: {
+                    gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+                  }
                 }
               }
             }
           }
-        }
-      },
-      orderBy: { balance: 'desc' }
-    })
+        },
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.saving.count({ where })
+    ])
 
     const formattedSavings = savings.map(saving => {
       const fullName = `${saving.member.firstName} ${saving.member.lastName}`
@@ -62,14 +91,24 @@ export async function GET(request: NextRequest) {
         interestRate: `${saving.interestRate}%`,
         lastDeposit: lastTransaction?.createdAt.toISOString().split('T')[0] || null,
         monthlyTarget: '₦500.00', // This could be configurable per member
-        progress: Math.min(Math.round((saving._count.transactions / 4) * 100), 100), // Assuming 4 transactions per month as target
+        progress: Math.min(Math.round((saving._count.transactions / 4) * 100), 100),
         status: saving.status,
         memberId: saving.member.id,
-        savingId: saving.id
+        savingId: saving.id,
+        currentBalance: saving.balance, // Raw balance for calculations
+        rawAccountType: saving.accountType // Original enum value
       }
     })
 
-    return NextResponse.json(formattedSavings)
+    return NextResponse.json({
+      accounts: formattedSavings,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    })
   } catch (error) {
     console.error('Error fetching savings accounts:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -77,13 +116,6 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/savings/accounts - Create new savings account
-const createSavingSchema = z.object({
-  memberId: z.string(),
-  accountType: z.enum(['REGULAR', 'FIXED_DEPOSIT', 'TARGET', 'EMERGENCY']),
-  interestRate: z.number().min(0).max(100),
-  initialDeposit: z.number().optional()
-})
-
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -95,8 +127,17 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = createSavingSchema.parse(body)
 
+    // Check if member exists
+    const member = await prisma.member.findUnique({
+      where: { id: validatedData.memberId }
+    })
+
+    if (!member) {
+      return NextResponse.json({ error: 'Member not found' }, { status: 404 })
+    }
+
     // Generate unique account number
-    const accountNumber = `SA${Date.now().toString().slice(-6)}`
+    const accountNumber = `SAV${Date.now().toString().slice(-8)}`
 
     const result = await prisma.$transaction(async (prisma) => {
       // Create savings account
@@ -106,7 +147,20 @@ export async function POST(request: NextRequest) {
           accountNumber,
           accountType: validatedData.accountType,
           interestRate: validatedData.interestRate,
-          balance: validatedData.initialDeposit || 0
+          balance: validatedData.initialDeposit,
+          monthlyTarget: validatedData.monthlyTarget,
+          maturityDate: validatedData.maturityDate ? new Date(validatedData.maturityDate) : null,
+          status: 'ACTIVE'
+        },
+        include: {
+          member: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              memberCode: true
+            }
+          }
         }
       })
 
@@ -119,8 +173,8 @@ export async function POST(request: NextRequest) {
             amount: validatedData.initialDeposit,
             balance: validatedData.initialDeposit,
             method: 'CASH',
-            reference: `ST${Date.now()}`,
-            description: 'Initial deposit'
+            reference: `INIT-${accountNumber}`,
+            description: 'Initial deposit - Account opening'
           }
         })
       }
@@ -128,7 +182,11 @@ export async function POST(request: NextRequest) {
       return saving
     })
 
-    return NextResponse.json(result, { status: 201 })
+    return NextResponse.json({
+      success: true,
+      account: result,
+      message: 'Savings account created successfully'
+    }, { status: 201 })
   } catch (error) {
     console.error('Error creating savings account:', error)
     if (error instanceof z.ZodError) {

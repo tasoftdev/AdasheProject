@@ -45,6 +45,11 @@ import {
   XCircle,
   Clock,
   Loader2,
+  Download,
+  BarChart3,
+  Sparkles,
+  Target,
+  Zap,
 } from "lucide-react"
 import { ContributionRowSkeleton } from "@/components/ui/skeletons"
 import { toast } from "sonner"
@@ -100,7 +105,6 @@ interface NewContribution {
   dueDate: string
 }
 
-
 export default function ContributionsPage() {
   const [contributions, setContributions] = useState<Contribution[]>([])
   const [members, setMembers] = useState<Member[]>([])
@@ -111,6 +115,7 @@ export default function ContributionsPage() {
   const [typeFilter, setTypeFilter] = useState<string>("ALL")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isAddingContribution, setIsAddingContribution] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -126,6 +131,10 @@ export default function ContributionsPage() {
     description: "",
     dueDate: ""
   })
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Fetch contributions
   const fetchContributions = async (page = 1) => {
@@ -181,7 +190,7 @@ export default function ContributionsPage() {
     setIsAddingContribution(true)
     
     try {
-      console.log('Submitting contribution:', newContribution) // Debug log
+      console.log('Submitting contribution:', newContribution)
       
       const response = await fetch('/api/contributions', {
         method: 'POST',
@@ -198,7 +207,7 @@ export default function ContributionsPage() {
 
       toast.success("Contribution added successfully!")
       
-      // Reset form and close dialog
+
       setNewContribution({
         memberId: "",
         amount: "",
@@ -209,7 +218,6 @@ export default function ContributionsPage() {
       })
       setIsAddDialogOpen(false)
       
-      // Refresh contributions list
       fetchContributions()
     } catch (error: any) {
       console.error('Error adding contribution:', error)
@@ -219,7 +227,6 @@ export default function ContributionsPage() {
     }
   }
 
-  // Helper functions
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
   }
@@ -269,7 +276,6 @@ export default function ContributionsPage() {
     }
   }
 
-  // Load data on component mount and filter changes
   useEffect(() => {
     fetchContributions()
     fetchMembers()
@@ -278,192 +284,269 @@ export default function ContributionsPage() {
   useEffect(() => {
     fetchContributions(1)
   }, [statusFilter, typeFilter])
+
+  const statsData = [
+    {
+      title: "Total Contributions",
+      value: `₦${stats.total.toLocaleString()}`,
+      change: `${stats.count} contributions recorded`,
+      trend: "up" as const,
+      icon: DollarSign,
+      color: "from-green-500 to-teal-500",
+      bgColor: "bg-green-50",
+      iconColor: "text-green-600"
+    },
+    {
+      title: "Active Contributors",
+      value: members.length.toString(),
+      change: "Registered members",
+      trend: "neutral" as const,
+      icon: Users,
+      color: "from-blue-500 to-cyan-500",
+      bgColor: "bg-blue-50",
+      iconColor: "text-blue-600"
+    },
+    {
+      title: "Collection Rate",
+      value: `${contributions.length > 0 
+        ? Math.round((contributions.filter(c => c.status === 'COMPLETED').length / contributions.length) * 100)
+        : 0}%`,
+      change: "Payment completion rate",
+      trend: "up" as const,
+      icon: TrendingUp,
+      color: "from-purple-500 to-pink-500",
+      bgColor: "bg-purple-50",
+      iconColor: "text-purple-600"
+    },
+    {
+      title: "Overdue Payments",
+      value: contributions.filter(c => c.status === 'OVERDUE').length.toString(),
+      change: "Require immediate attention",
+      trend: "down" as const,
+      icon: Clock,
+      color: "from-orange-500 to-red-500",
+      bgColor: "bg-orange-50",
+      iconColor: "text-orange-600"
+    },
+  ]
+
   return (
     <AppLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Contributions</h1>
-            <p className="text-muted-foreground">
-              Track and manage member contributions and payments.
-            </p>
+      <div className="space-y-6 relative">
+        {mounted && (
+          <div className="absolute inset-0 overflow-hidden -z-10">
+            <div className="absolute top-10 right-10 w-40 h-40 bg-gradient-to-r from-green-200 to-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
+            <div className="absolute bottom-10 left-10 w-48 h-48 bg-gradient-to-r from-blue-200 to-cyan-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow animation-delay-2000"></div>
+            <div className="absolute top-1/2 right-1/3 w-28 h-28 bg-gradient-to-r from-purple-200 to-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow animation-delay-4000"></div>
           </div>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Record Contribution
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <form onSubmit={handleAddContribution}>
-                <DialogHeader>
-                  <DialogTitle>Record New Contribution</DialogTitle>
-                  <DialogDescription>
-                    Record a new contribution payment from a member.
-                  </DialogDescription>
-                </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="member">Member</Label>
-                  <Select value={newContribution.memberId} onValueChange={(value) => setNewContribution(prev => ({ ...prev, memberId: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select member" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {members.map((member) => (
-                        <SelectItem key={member.id} value={member.id}>
-                          {member.firstName} {member.lastName} - {member.memberCode}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="amount">Amount</Label>
-                    <Input 
-                      id="amount" 
-                      type="number" 
-                      placeholder="150.00"
-                      value={newContribution.amount}
-                      onChange={(e) => setNewContribution(prev => ({ ...prev, amount: e.target.value }))}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="type">Contribution Type</Label>
-                    <Select value={newContribution.type} onValueChange={(value) => setNewContribution(prev => ({ ...prev, type: value as any }))}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="MONTHLY">Monthly Contribution</SelectItem>
-                        <SelectItem value="SPECIAL">Special Contribution</SelectItem>
-                        <SelectItem value="EMERGENCY">Emergency Fund</SelectItem>
-                        <SelectItem value="PENALTY">Penalty Payment</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="method">Payment Method</Label>
-                    <Select value={newContribution.method} onValueChange={(value) => setNewContribution(prev => ({ ...prev, method: value as any }))}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select method" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="CASH">Cash</SelectItem>
-                        <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
-                        <SelectItem value="MOBILE_MONEY">Mobile Money</SelectItem>
-                        <SelectItem value="CREDIT_CARD">Credit Card</SelectItem>
-                        <SelectItem value="DEBIT_CARD">Debit Card</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="date">Date</Label>
-                    <Input 
-                      id="date" 
-                      type="date"
-                      value={newContribution.dueDate}
-                      onChange={(e) => setNewContribution(prev => ({ ...prev, dueDate: e.target.value }))}
-                    />
-                  </div>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="reference">Description</Label>
-                  <Input 
-                    id="reference" 
-                    placeholder="Optional description"
-                    value={newContribution.description}
-                    onChange={(e) => setNewContribution(prev => ({ ...prev, description: e.target.value }))}
-                  />
-                </div>
+        )}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl shadow-lg">
+                <DollarSign className="h-8 w-8 text-white" />
               </div>
-              <DialogFooter>
-                <Button type="submit" disabled={isAddingContribution}>
-                  {isAddingContribution ? "Recording..." : "Record Contribution"}
+              <div>
+                <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 via-blue-600 to-teal-600 bg-clip-text text-transparent">
+                  Contributions
+                </h1>
+                <p className="text-base sm:text-lg text-gray-600 font-medium mt-1">
+                  Track and manage member contributions and payments.
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="outline"
+              className="border-gray-300 hover:bg-gray-50 transition-all duration-200"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Record Contribution
                 </Button>
-              </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px] bg-white/95 backdrop-blur-sm border border-white/20 shadow-2xl">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 to-teal-500"></div>
+                <form onSubmit={handleAddContribution}>
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-gray-800">Record New Contribution</DialogTitle>
+                    <DialogDescription className="text-gray-600">
+                      Record a new contribution payment from a member.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="member" className="font-medium text-gray-700">Member</Label>
+                      <Select value={newContribution.memberId} onValueChange={(value) => setNewContribution(prev => ({ ...prev, memberId: value }))}>
+                        <SelectTrigger className="bg-white/50 border-gray-200">
+                          <SelectValue placeholder="Select member" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {members.map((member) => (
+                            <SelectItem key={member.id} value={member.id}>
+                              {member.firstName} {member.lastName} - {member.memberCode}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="amount" className="font-medium text-gray-700">Amount</Label>
+                        <Input 
+                          id="amount" 
+                          type="number" 
+                          placeholder="150.00"
+                          value={newContribution.amount}
+                          onChange={(e) => setNewContribution(prev => ({ ...prev, amount: e.target.value }))}
+                          className="bg-white/50 border-gray-200"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="type" className="font-medium text-gray-700">Type</Label>
+                        <Select value={newContribution.type} onValueChange={(value) => setNewContribution(prev => ({ ...prev, type: value as any }))}>
+                          <SelectTrigger className="bg-white/50 border-gray-200">
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="MONTHLY">Monthly Contribution</SelectItem>
+                            <SelectItem value="SPECIAL">Special Contribution</SelectItem>
+                            <SelectItem value="EMERGENCY">Emergency Fund</SelectItem>
+                            <SelectItem value="PENALTY">Penalty Payment</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="method" className="font-medium text-gray-700">Payment Method</Label>
+                        <Select value={newContribution.method} onValueChange={(value) => setNewContribution(prev => ({ ...prev, method: value as any }))}>
+                          <SelectTrigger className="bg-white/50 border-gray-200">
+                            <SelectValue placeholder="Select method" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="CASH">Cash</SelectItem>
+                            <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
+                            <SelectItem value="MOBILE_MONEY">Mobile Money</SelectItem>
+                            <SelectItem value="CREDIT_CARD">Credit Card</SelectItem>
+                            <SelectItem value="DEBIT_CARD">Debit Card</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="date" className="font-medium text-gray-700">Date</Label>
+                        <Input 
+                          id="date" 
+                          type="date"
+                          value={newContribution.dueDate}
+                          onChange={(e) => setNewContribution(prev => ({ ...prev, dueDate: e.target.value }))}
+                          className="bg-white/50 border-gray-200"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="reference" className="font-medium text-gray-700">Description</Label>
+                      <Input 
+                        id="reference" 
+                        placeholder="Optional description"
+                        value={newContribution.description}
+                        onChange={(e) => setNewContribution(prev => ({ ...prev, description: e.target.value }))}
+                        className="bg-white/50 border-gray-200"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button 
+                      type="submit" 
+                      disabled={isAddingContribution}
+                      className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                    >
+                      {isAddingContribution ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Recording...
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Record Contribution
+                        </>
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Contributions</CardTitle>
-              <DollarSign className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">₦{stats.total.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">
-                {stats.count} contributions recorded
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Contributors</CardTitle>
-              <Users className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{members.length}</div>
-              <p className="text-xs text-muted-foreground">
-                Registered members
-              </p>
-            </CardContent>
-          </Card>
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          {statsData.map((stat, index) => (
+            <Card 
+              key={stat.title} 
+              className="bg-white/80 backdrop-blur-sm border border-white/20 shadow-xl relative overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+            >
+              {/* Animated gradient border */}
+              <div className={`absolute inset-0 bg-gradient-to-r ${stat.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
+              
+              {/* Top accent bar */}
+              <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${stat.color}`}></div>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Collection Rate</CardTitle>
-              <TrendingUp className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {contributions.length > 0 
-                  ? Math.round((contributions.filter(c => c.status === 'COMPLETED').length / contributions.length) * 100)
-                  : 0}%
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Payment completion rate
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Overdue Payments</CardTitle>
-              <Clock className="h-4 w-4 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {contributions.filter(c => c.status === 'OVERDUE').length}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Require immediate attention
-              </p>
-            </CardContent>
-          </Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-semibold text-gray-700 truncate">
+                  {stat.title}
+                </CardTitle>
+                <div className={`p-2 rounded-lg ${stat.bgColor} transition-all duration-300 group-hover:scale-110`}>
+                  <stat.icon className={`h-4 w-4 ${stat.iconColor}`} />
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight mb-1">
+                  {stat.value}
+                </div>
+                <p className="text-xs text-gray-600 flex items-center">
+                  {stat.trend === "up" && <TrendingUp className="h-3 w-3 mr-1 text-green-500 flex-shrink-0" />}
+                  {stat.trend === "down" && <XCircle className="h-3 w-3 mr-1 text-red-500 flex-shrink-0" />}
+                  {stat.trend === "neutral" && <Users className="h-3 w-3 mr-1 text-blue-500 flex-shrink-0" />}
+                  <span className="truncate font-medium">{stat.change}</span>
+                </p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         {/* Contributions Table */}
-        <Card>
+        <Card className="bg-white/80 backdrop-blur-sm border border-white/20 shadow-xl">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500"></div>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Recent Contributions</CardTitle>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <CardTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-blue-600" />
+                Recent Contributions
+              </CardTitle>
               <div className="flex items-center space-x-2">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Search contributions..." className="pl-10 w-64" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input 
+                    placeholder="Search contributions..." 
+                    className="pl-10 w-48 bg-white/50 border-gray-200 focus:border-blue-500 transition-all duration-200"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
                 </div>
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="border-gray-300 hover:bg-gray-50 transition-all duration-200"
+                >
                   <Filter className="h-4 w-4 mr-2" />
                   Filter
                 </Button>
@@ -472,78 +555,142 @@ export default function ContributionsPage() {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="all" className="space-y-4">
-              <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="completed">Completed</TabsTrigger>
-                <TabsTrigger value="pending">Pending</TabsTrigger>
-                <TabsTrigger value="overdue">Overdue</TabsTrigger>
+              <TabsList className="bg-gray-100/50 p-1 rounded-lg">
+                <TabsTrigger 
+                  value="all" 
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-200"
+                >
+                  All
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="completed"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-200"
+                >
+                  Completed
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="pending"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-200"
+                >
+                  Pending
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="overdue"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-200"
+                >
+                  Overdue
+                </TabsTrigger>
               </TabsList>
+              
               <TabsContent value="all" className="space-y-4">
-                <div className="rounded-md border">
+                <div className="rounded-lg border border-gray-200 overflow-hidden">
                   <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead>Member</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Payment Method</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Reference</TableHead>
+                      <TableRow className="hover:bg-transparent bg-gray-50/50">
+                        <TableHead className="font-semibold text-gray-700">Member</TableHead>
+                        <TableHead className="font-semibold text-gray-700">Amount</TableHead>
+                        <TableHead className="font-semibold text-gray-700">Type</TableHead>
+                        <TableHead className="font-semibold text-gray-700">Payment Method</TableHead>
+                        <TableHead className="font-semibold text-gray-700">Date</TableHead>
+                        <TableHead className="font-semibold text-gray-700">Status</TableHead>
+                        <TableHead className="font-semibold text-gray-700">Reference</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {contributions.map((contribution) => (
-                        <TableRow key={contribution.id}>
-                          <TableCell>
-                            <div className="flex items-center space-x-3">
-                              <Avatar className="h-8 w-8">
-                                <AvatarImage src={contribution.member.avatar || ""} alt={`${contribution.member.firstName} ${contribution.member.lastName}`} />
-                                <AvatarFallback>
-                                  {getInitials(contribution.member.firstName, contribution.member.lastName)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="font-medium">{contribution.member.firstName} {contribution.member.lastName}</div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {contribution.amount}
-                          </TableCell>
-                          <TableCell>{contribution.type}</TableCell>
-                          <TableCell>{contribution.method}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center">
-                              <Calendar className="h-3 w-3 mr-2 text-muted-foreground" />
-                              {new Date(contribution.createdAt).toLocaleDateString()}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center">
-                              {contribution.status === "COMPLETED" && (
-                                <>
-                                  <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-                                  <Badge variant="default">Completed</Badge>
-                                </>
-                              )}
-                              {contribution.status === "PENDING" && (
-                                <>
-                                  <Clock className="h-4 w-4 mr-2 text-yellow-500" />
-                                  <Badge variant="secondary">Pending</Badge>
-                                </>
-                              )}
-                              {contribution.status === "OVERDUE" && (
-                                <>
-                                  <XCircle className="h-4 w-4 mr-2 text-red-500" />
-                                  <Badge variant="destructive">Overdue</Badge>
-                                </>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {contribution.reference}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {loading ? (
+                        Array.from({ length: 5 }).map((_, index) => (
+                          <TableRow key={index}>
+                            <TableCell colSpan={7}>
+                              <div className="flex items-center space-x-4 py-4">
+                                <div className="animate-pulse flex space-x-4 w-full">
+                                  <div className="rounded-full bg-gray-200 h-10 w-10"></div>
+                                  <div className="flex-1 space-y-2">
+                                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                                  </div>
+                                </div>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        contributions.map((contribution) => (
+                          <TableRow 
+                            key={contribution.id}
+                            className="hover:bg-gray-50/50 transition-colors duration-150 group"
+                          >
+                            <TableCell>
+                              <div className="flex items-center space-x-3">
+                                <Avatar className="h-8 w-8 border border-gray-200 group-hover:border-blue-200 transition-colors duration-200">
+                                  <AvatarImage src={contribution.member.avatar || ""} alt={`${contribution.member.firstName} ${contribution.member.lastName}`} />
+                                  <AvatarFallback className="bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-600 font-medium">
+                                    {getInitials(contribution.member.firstName, contribution.member.lastName)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <div className="font-semibold text-gray-900">
+                                    {contribution.member.firstName} {contribution.member.lastName}
+                                  </div>
+                                  <div className="text-xs text-gray-500 font-medium">
+                                    {contribution.member.memberCode}
+                                  </div>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="font-bold text-gray-900">
+                              ₦{contribution.amount.toLocaleString()}
+                            </TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant="outline" 
+                                className="font-medium text-gray-700 border-gray-300"
+                              >
+                                {getTypeDisplay(contribution.type)}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-gray-700 font-medium">
+                              {contribution.method.replace('_', ' ')}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center text-gray-600 font-medium">
+                                <Calendar className="h-3 w-3 mr-2 text-gray-400" />
+                                {new Date(contribution.createdAt).toLocaleDateString()}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center">
+                                {contribution.status === "COMPLETED" && (
+                                  <>
+                                    <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+                                    <Badge variant="default" className="bg-green-100 text-green-700 border-green-200 font-medium">
+                                      Completed
+                                    </Badge>
+                                  </>
+                                )}
+                                {contribution.status === "PENDING" && (
+                                  <>
+                                    <Clock className="h-4 w-4 mr-2 text-yellow-500" />
+                                    <Badge variant="secondary" className="bg-yellow-100 text-yellow-700 border-yellow-200 font-medium">
+                                      Pending
+                                    </Badge>
+                                  </>
+                                )}
+                                {contribution.status === "OVERDUE" && (
+                                  <>
+                                    <XCircle className="h-4 w-4 mr-2 text-red-500" />
+                                    <Badge variant="destructive" className="bg-red-100 text-red-700 border-red-200 font-medium">
+                                      Overdue
+                                    </Badge>
+                                  </>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-gray-500 font-medium text-sm">
+                              {contribution.reference}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 </div>
@@ -551,7 +698,53 @@ export default function ContributionsPage() {
             </Tabs>
           </CardContent>
         </Card>
+
+        {/* Quick Stats Footer */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Card className="bg-gradient-to-r from-green-500/10 to-teal-500/10 border border-green-200/50 backdrop-blur-sm">
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-green-700 mb-1">
+                {contributions.filter(c => c.status === 'COMPLETED').length}
+              </div>
+              <div className="text-sm font-medium text-green-600">Successful Payments</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-200/50 backdrop-blur-sm">
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-blue-700 mb-1">
+                {contributions.filter(c => c.status === 'PENDING').length}
+              </div>
+              <div className="text-sm font-medium text-blue-600">Pending Approval</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-200/50 backdrop-blur-sm">
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-orange-700 mb-1">
+                {contributions.filter(c => c.status === 'OVERDUE').length}
+              </div>
+              <div className="text-sm font-medium text-orange-600">Needs Attention</div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </AppLayout>
+
+      <style jsx global>{`
+        @keyframes pulse-slow {
+          0%, 100% { transform: scale(1); opacity: 0.2; }
+          50% { transform: scale(1.05); opacity: 0.15; }
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 8s ease-in-out infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
+    </AppLayout> 
   )
 }

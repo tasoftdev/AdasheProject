@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
-import PayoutDashboard from '@/components/payouts/payout-dashboard';
+import PayoutDashboard from '@/app/payout/page';
 
 export default function PayoutsPage() {
   const { data: session, status } = useSession();

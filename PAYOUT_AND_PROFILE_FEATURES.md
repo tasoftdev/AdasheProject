@@ -1,7 +1,3 @@
-# Adashe Cooperative - Payout System and Enhanced Profiles
-
-This document outlines the newly added Payout System and Enhanced Profile features in the Adashe Cooperative Management System.
-
 ## 🚀 Features Added
 
 ### 1. Enhanced Profile System
