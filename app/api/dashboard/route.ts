@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// GET /api/dashboard - Get dashboard statistics
 export async function GET() {
   try {
     const currentMonth = new Date()
@@ -9,7 +8,6 @@ export async function GET() {
     const lastMonth = new Date(currentMonth)
     lastMonth.setMonth(lastMonth.getMonth() - 1)
 
-    // Get main statistics
     const [
       totalMembers,
       activeMembers,
@@ -20,19 +18,16 @@ export async function GET() {
       totalSavings,
       recentTransactions
     ] = await Promise.all([
-      // Total members
+   
       prisma.member.count(),
       
-      // Active members
       prisma.member.count({ where: { status: 'ACTIVE' } }),
       
-      // Total contributions
       prisma.contribution.aggregate({
         _sum: { amount: true },
         _count: { id: true }
       }),
       
-      // Monthly contributions
       prisma.contribution.aggregate({
         where: {
           createdAt: { gte: currentMonth }
@@ -40,23 +35,19 @@ export async function GET() {
         _sum: { amount: true },
         _count: { id: true }
       }),
-      
-      // Total loans
+    
       prisma.loan.aggregate({
         _sum: { amount: true },
         _count: { id: true }
       }),
       
-      // Active loans
       prisma.loan.count({ where: { status: 'ACTIVE' } }),
-      
-      // Total savings  
+        
       prisma.saving.aggregate({
         _sum: { balance: true },
         _count: true
       }),
       
-      // Recent transactions
       prisma.transaction.findMany({
         take: 10,
         orderBy: { createdAt: 'desc' },
@@ -76,7 +67,6 @@ export async function GET() {
     console.log('totalSavings:', totalSavings)
     console.log('totalSavings._count:', totalSavings._count, 'type:', typeof totalSavings._count)
 
-    // Calculate month-over-month growth
     const lastMonthContributions = await prisma.contribution.aggregate({
       where: {
         createdAt: { 
@@ -91,7 +81,6 @@ export async function GET() {
       ? ((Number(monthlyContributions._sum.amount) || 0) - (Number(lastMonthContributions._sum.amount) || 0)) / (Number(lastMonthContributions._sum.amount) || 1) * 100
       : 0
 
-    // Get monthly trends for charts (last 6 months)
     const sixMonthsAgo = new Date()
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
 
@@ -106,14 +95,12 @@ export async function GET() {
       ORDER BY month
     ` as any[]
 
-    // Get contribution status breakdown
     const contributionBreakdown = await prisma.contribution.groupBy({
       by: ['status'],
       _sum: { amount: true },
       _count: { id: true }
     })
 
-    // Get loan status breakdown
     const loanBreakdown = await prisma.loan.groupBy({
       by: ['status'],
       _sum: { amount: true },

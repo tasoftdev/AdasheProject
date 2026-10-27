@@ -46,7 +46,6 @@ import {
 } from "lucide-react"
 import { TransactionRowSkeleton } from "@/components/ui/skeletons"
 
-// Safe function to get initials - ADDED THIS
 const getInitials = (name: string | undefined | null): string => {
   if (!name || typeof name !== 'string') {
     return '??'
@@ -119,14 +118,11 @@ export default function TransactionsPage() {
     try {
       setLoading(true)
       
-      // Build query parameters
       const params = new URLSearchParams()
       if (selectedType !== "all") params.append("type", selectedType)
       if (selectedStatus !== "all") params.append("status", selectedStatus)
       if (searchTerm) params.append("search", searchTerm)
       params.append("limit", "50")
-
-      // Fetch both transactions and summary data in parallel
       const [transactionsResponse, summaryResponse] = await Promise.all([
         fetch(`/api/reports/transactions?${params}`),
         fetch('/api/transactions/summary')
@@ -139,17 +135,15 @@ export default function TransactionsPage() {
       const transactionData = await transactionsResponse.json()
       const summaryData = await summaryResponse.json()
       
-      // Update summary state
       setSummaryData(summaryData)
       
-      // Transform data to match UI expectations - FIXED VERSION
       const transformedTransactions = transactionData.transactions?.map((tx: any) => ({
         id: tx.id,
         date: new Date(tx.date).toLocaleString(),
         type: tx.type,
         category: tx.category || tx.type,
-        member: tx.memberName || 'Unknown Member', // Added fallback
-        initials: getInitials(tx.memberName), // FIXED: Using safe function
+        member: tx.memberName || 'Unknown Member', 
+        initials: getInitials(tx.memberName), 
         amount: tx.amount,
         status: tx.status || 'completed',
         reference: tx.reference || tx.id,
@@ -159,7 +153,6 @@ export default function TransactionsPage() {
 
       setTransactions(transformedTransactions)
       
-      // Generate statistics from real data
       const totalTransactions = transformedTransactions.length
       const totalVolume = transformedTransactions.reduce((sum: number, tx: any) => {
         const amount = parseFloat(tx.amount.replace(/[₦,]/g, '')) || 0
@@ -219,7 +212,6 @@ export default function TransactionsPage() {
 
       setTransactionStats(stats)
 
-      // Generate transaction types from real data
       const typeCount = transformedTransactions.reduce((acc: any, tx: any) => {
         acc[tx.type] = (acc[tx.type] || 0) + 1
         return acc
@@ -261,7 +253,6 @@ export default function TransactionsPage() {
   return (
     <AppLayout>
       <div className="space-y-6 relative">
-        {/* Animated Background Elements */}
         {mounted && (
           <div className="absolute inset-0 overflow-hidden -z-10">
             <div className="absolute top-10 right-10 w-40 h-40 bg-gradient-to-r from-blue-200 to-cyan-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
@@ -463,7 +454,6 @@ export default function TransactionsPage() {
               </Card>
             </div>
 
-            {/* Main Transactions Table */}
             <Card className="bg-white/80 backdrop-blur-sm border border-white/20 shadow-xl">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500"></div>
               <CardHeader>
