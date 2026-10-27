@@ -57,7 +57,6 @@ import {
 import { SavingsRowSkeleton } from "@/components/ui/skeletons"
 import { toast } from "sonner"
 
-// Types
 interface SavingsAccount {
   id: string
   member: string
@@ -114,7 +113,6 @@ export default function SavingsPage() {
   const [withdrawalDialogOpen, setWithdrawalDialogOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  // Form states
   const [depositForm, setDepositForm] = useState({
     memberId: '',
     savingId: '',
@@ -146,7 +144,6 @@ export default function SavingsPage() {
     calculated: false
   })
 
-  // Search state for accounts
   const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
@@ -155,7 +152,6 @@ export default function SavingsPage() {
     fetchMembers()
   }, [])
 
-  // Fixed: Ensure savingsAccounts is always an array before filtering
   const filteredSavingsAccounts = Array.isArray(savingsAccounts) 
     ? savingsAccounts.filter(account =>
         account?.member?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -177,7 +173,6 @@ export default function SavingsPage() {
     let finalAmount = 0
     let interestEarned = 0
 
-    // Calculate based on compounding frequency
     switch (interestCalculator.compoundFrequency) {
       case 'monthly':
         const monthlyRate = annualRate / 12
@@ -193,7 +188,6 @@ export default function SavingsPage() {
         finalAmount = principal * Math.pow(1 + annualRate, years)
         break
       default:
-        // Simple interest fallback
         finalAmount = principal * (1 + (annualRate * timeInMonths / 12))
     }
 
@@ -212,8 +206,7 @@ export default function SavingsPage() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      
-      // Mock data for demonstration - replace with actual API calls
+    
       const mockAccounts: SavingsAccount[] = [
         {
           id: "",
@@ -327,7 +320,6 @@ export default function SavingsPage() {
 
   const fetchMembers = async () => {
     try {
-      // Mock members data
       const mockMembers: Member[] = [
         {
           id: "",
@@ -360,7 +352,7 @@ export default function SavingsPage() {
 
   const fetchMemberSavingsAccounts = async (memberId: string) => {
     try {
-      // Mock member savings accounts
+      
       const mockMemberAccounts = savingsAccounts.filter(account => account.memberId === memberId)
       setMemberSavingsAccounts(mockMemberAccounts)
     } catch (error) {
@@ -385,7 +377,7 @@ export default function SavingsPage() {
         method: 'CASH',
         date: new Date().toISOString().split('T')[0]
       })
-      fetchData() // Refresh data
+      fetchData() 
     } catch (error: any) {
       toast.error(error.message || 'Failed to record deposit')
     }
@@ -405,7 +397,7 @@ export default function SavingsPage() {
         amount: '',
         purpose: ''
       })
-      fetchData() // Refresh data
+      fetchData() 
     } catch (error: any) {
       toast.error(error.message || 'Failed to process withdrawal')
     }
@@ -461,7 +453,6 @@ export default function SavingsPage() {
   return (
     <AppLayout>
       <div className="space-y-6 relative">
-        {/* Animated Background Elements */}
         {mounted && (
           <div className="absolute inset-0 overflow-hidden -z-10">
             <div className="absolute top-10 right-10 w-40 h-40 bg-gradient-to-r from-green-200 to-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
@@ -470,7 +461,6 @@ export default function SavingsPage() {
           </div>
         )}
 
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-3">
             <div className="flex items-center gap-3">
@@ -742,7 +732,6 @@ export default function SavingsPage() {
           </div>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {loading ? (
             Array.from({ length: 4 }).map((_, i) => (
@@ -764,10 +753,8 @@ export default function SavingsPage() {
                 key={stat.title} 
                 className="bg-white/80 backdrop-blur-sm border border-white/20 shadow-xl relative overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
               >
-                {/* Animated gradient border */}
                 <div className={`absolute inset-0 bg-gradient-to-r ${stat.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
                 
-                {/* Top accent bar */}
                 <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${stat.color}`}></div>
 
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
@@ -798,7 +785,6 @@ export default function SavingsPage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Savings Overview Chart Placeholder */}
           <Card className="lg:col-span-2 bg-white/80 backdrop-blur-sm border border-white/20 shadow-xl">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500"></div>
             <CardHeader>

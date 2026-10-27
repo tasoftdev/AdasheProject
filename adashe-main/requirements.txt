@@ -1,0 +1,45 @@
+Functional Requirements
+The functional requirements define what the system should do. For the cooperative management system (Adashe app), the key functional requirements include:
+1.	Member Management
+o	Registration of members with unique profiles.
+o	Role-based access for administrators and members.
+2.	Contribution Management
+o	Recording and tracking of member contributions.
+o	Notifications/reminders for upcoming contributions.
+3.	Loan Management
+o	Loan application, approval, and disbursement.
+o	Tracking of repayment schedules.
+4.	Savings & Payouts
+o	Monitoring group savings.
+o	Automated calculation of payouts/dividends.
+5.	Financial Transparency
+o	Real-time reporting of contributions and expenditures.
+o	Secure digital receipts for every transaction.
+6.	Accountability & Fraud Prevention
+o	Audit logs of all transactions.
+o	Verification features to prevent unauthorized changes.
+7.	Communication & Engagement
+o	In-app messaging and announcements.
+o	Notifications for meetings and updates.
+8.	Gamification Features (Optional)
+o	Contribution scoring system to encourage timely payments.
+o	Rewards or recognition for consistent contributors.
+
+ Non-Functional Requirements
+Non-functional requirements define the qualities and constraints of the system.
+1.	Performance
+o	The system should handle multiple users concurrently without lag.
+2.	Scalability
+o	The system must support an increasing number of members and cooperatives.
+3.	Security
+o	Data encryption, authentication, and role-based authorization.
+o	Secure payment integration.
+4.	Usability
+o	Simple, intuitive user interface accessible to members with varying levels of digital literacy.
+5.	Reliability & Availability
+o	24/7 system availability with minimal downtime.
+o	Regular data backups.
+6.	Portability
+o	Accessible via mobile devices (Android/iOS) and web browsers.
+7.	Maintainability
+o	Modular system architecture for easy updates and feature additions.

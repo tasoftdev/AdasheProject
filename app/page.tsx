@@ -9,19 +9,6 @@ export default function Home() {
       <header className="w-full border-b border-slate-200/50 bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
-              <Image 
-                src="/logo.png" 
-                alt="Adashe" 
-                width={48} 
-                height={48} 
-                className="relative rounded-lg transform group-hover:scale-105 transition duration-300"
-              />
-            </div>
-            <span className="font-bold text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Adashe
-            </span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-700">
@@ -53,9 +40,9 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="flex-1">
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          <div className="space-y-8">
+      <main className="flex-1 ">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 lg:grid-cols-1 gap-12 lg:gap-20 items-center">
+          <div className="space-y-20">
             <div className="space-y-4">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight">
                 <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
@@ -81,31 +68,6 @@ export default function Home() {
               </Link>
             </div>
             </div>
-          <div className="relative">
-            <div className="relative z-10">
-              <div className="absolute -inset-4 bg-gradient-to-r from-blue-400 to-purple-500 rounded-3xl blur-xl opacity-20 animate-pulse"></div>
-              <div className="relative bg-gradient-to-br from-white to-blue-50 rounded-2xl p-8 shadow-2xl border border-white/20 backdrop-blur-sm">
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-1 shadow-lg">
-                  <div className="bg-white rounded-xl p-6">
-                    <Image 
-                      src="/app/public/logo.png" 
-                      alt="Adashe Dashboard Preview" 
-                      width={500} 
-                      height={350} 
-                      className="rounded-lg w-full h-auto transform hover:scale-105 transition duration-500"
-                    />
-                  </div>
-                </div>
-                
-                <div className="absolute -top-4 -right-4 w-20 h-20 bg-yellow-400 rounded-2xl rotate-12 shadow-lg flex items-center justify-center">
-                  <span className="text-yellow-800 font-bold text-sm">💰</span>
-                </div>
-                <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-green-400 rounded-2xl -rotate-12 shadow-lg flex items-center justify-center">
-                  <span className="text-green-800 font-bold text-sm">📈</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </section>
 
         <section id="features" className="py-20 bg-white/50">

@@ -1394,7 +1394,6 @@ export default function MembersPage() {
                     </div>
                   </div>
 
-                  {/* Messages */}
                   <ScrollArea className="flex-1 p-4">
                     {isChatLoading ? (
                       <div className="space-y-4">

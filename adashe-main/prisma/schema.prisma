@@ -1,0 +1,944 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User and Authentication Models
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  role      UserRole @default(MEMBER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  member Member?
+
+  @@map("users")
+}
+
+model Member {
+  id          String       @id @default(cuid())
+  userId      String       @unique
+  firstName   String
+  lastName    String
+  phone       String       @unique
+  email       String       @unique
+  dateOfBirth DateTime?
+  address     String?
+  occupation  String?
+  status      MemberStatus @default(ACTIVE)
+  joinDate    DateTime     @default(now())
+  memberCode  String       @unique
+  avatar      String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profile       Profile?
+  contributions Contribution[]
+  loans         Loan[]
+  savings       Saving[]
+  transactions  Transaction[]
+  payouts       Payout[]
+  
+  // Payment Relations
+  payments      Payment[]
+  payoutRequests PayoutRequest[]
+  
+  // Streak Relations
+  streaks           MemberStreak[]
+  streakActivities  StreakActivity[]
+  achievements      StreakAchievement[]
+  leaderboards      StreakLeaderboard[]
+
+  // Conversation Relations
+  conversationParticipants ConversationParticipant[]
+  messages                 Message[]
+
+  @@map("members")
+}
+
+// Enhanced Profile Model
+model Profile {
+  id        String   @id @default(cuid())
+  memberId  String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Personal Information
+  middleName        String?
+  gender           Gender?
+  maritalStatus    MaritalStatus?
+  nationality      String?
+  stateOfOrigin    String?
+  localGovernment  String?
+  religion         String?
+  bloodGroup       String?
+
+  // Contact Information
+  alternatePhone   String?
+  alternateEmail   String?
+  residentialAddress String?
+  permanentAddress   String?
+  city             String?
+  state            String?
+  postalCode       String?
+  country          String?
+
+  // Professional Information
+  employer         String?
+  jobTitle         String?
+  workAddress      String?
+  workPhone        String?
+  workEmail        String?
+  monthlyIncome    Decimal? @db.Decimal(10, 2)
+  yearsOfExperience Int?
+
+  // Emergency Contact
+  emergencyContactName     String?
+  emergencyContactPhone    String?
+  emergencyContactEmail    String?
+  emergencyContactRelation String?
+  emergencyContactAddress  String?
+
+  // Next of Kin
+  nextOfKinName        String?
+  nextOfKinPhone       String?
+  nextOfKinEmail       String?
+  nextOfKinRelation    String?
+  nextOfKinAddress     String?
+  nextOfKinDateOfBirth DateTime?
+
+  // Banking Information
+  bankName         String?
+  bankAccountName  String?
+  bankAccountNumber String?
+  bankBranch       String?
+  bankSortCode     String?
+  bvn              String? // Bank Verification Number
+
+  // Additional Information
+  languages        String? // JSON array of languages spoken
+  skills           String? // JSON array of skills
+  hobbies          String? // JSON array of hobbies
+  socialMedia      String? // JSON object with social media handles
+  preferredCommunication PreferredCommunication @default(EMAIL)
+
+  // Documents
+  documents        ProfileDocument[]
+
+  // Relations
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+// Profile Documents
+model ProfileDocument {
+  id          String      @id @default(cuid())
+  profileId   String
+  type        DocumentType
+  fileName    String
+  fileUrl     String
+  fileSize    Int?
+  mimeType    String?
+  uploadedAt  DateTime    @default(now())
+  verifiedAt  DateTime?
+  verifiedBy  String?
+  status      DocumentStatus @default(PENDING)
+  expiryDate  DateTime?
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("profile_documents")
+}
+
+// Payout System Models
+model Payout {
+  id          String        @id @default(cuid())
+  memberId    String
+  type        PayoutType
+  category    PayoutCategory
+  amount      Decimal       @db.Decimal(10, 2)
+  description String
+  reason      String?
+  status      PayoutStatus  @default(PENDING)
+  requestedBy String        // User ID who requested the payout
+  approvedBy  String?       // User ID who approved the payout
+  processedBy String?       // User ID who processed the payout
+  
+  // Dates
+  requestDate  DateTime      @default(now())
+  approvedDate DateTime?
+  processedDate DateTime?
+  scheduledDate DateTime?    // For scheduled payouts
+  
+  // Payment Details
+  paymentMethod PaymentMethod
+  bankName      String?
+  accountName   String?
+  accountNumber String?
+  reference     String        @unique
+  
+  // Approvals
+  requiresApproval Boolean    @default(true)
+  approvalLevel   Int        @default(1) // 1, 2, 3 levels of approval
+  approvals       PayoutApproval[]
+  
+  // Additional Details
+  attachments     String?       // JSON array of attachment URLs
+  notes           String?
+  metadata        String?       // JSON for additional data
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@map("payouts")
+}
+
+model PayoutApproval {
+  id              String           @id @default(cuid())
+  payoutId        String?          // For legacy Payout model
+  payoutRequestId String?          // For new PayoutRequest model
+  level           Int              // Approval level (1, 2, 3)
+  approvedBy      String           // User ID
+  status          ApprovalStatus   
+  comments        String?
+  approvedAt      DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  // Relations
+  payout        Payout?        @relation(fields: [payoutId], references: [id], onDelete: Cascade)
+  payoutRequest PayoutRequest? @relation(fields: [payoutRequestId], references: [id], onDelete: Cascade)
+
+  @@unique([payoutId, level])
+  @@unique([payoutRequestId, level])
+  @@map("payout_approvals")
+}
+
+// Payout Templates for common payout types
+model PayoutTemplate {
+  id          String         @id @default(cuid())
+  name        String
+  type        PayoutType
+  category    PayoutCategory
+  description String
+  isActive    Boolean        @default(true)
+  
+  // Default values
+  defaultAmount     Decimal?  @db.Decimal(10, 2)
+  defaultMethod     PaymentMethod?
+  requiresApproval  Boolean   @default(true)
+  approvalLevels    Int       @default(1)
+  
+  // Configuration
+  allowMemberRequest Boolean  @default(false)
+  maxAmount         Decimal?  @db.Decimal(10, 2)
+  minAmount         Decimal?  @db.Decimal(10, 2)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("payout_templates")
+}
+
+// Financial Models
+model Contribution {
+  id          String             @id @default(cuid())
+  memberId    String
+  amount      Decimal            @db.Decimal(10, 2)
+  type        ContributionType
+  status      ContributionStatus @default(PENDING)
+  dueDate     DateTime?
+  paidDate    DateTime?
+  method      PaymentMethod
+  reference   String             @unique
+  description String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  // Relations
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@map("contributions")
+}
+
+model Loan {
+  id           String     @id @default(cuid())
+  memberId     String
+  amount       Decimal    @db.Decimal(10, 2)
+  interestRate Decimal    @db.Decimal(5, 2) // Changed from (5,4) to (5,2) to allow rates like 25.50%
+  term         Int // in months
+  status       LoanStatus @default(PENDING)
+  appliedDate  DateTime   @default(now())
+  approvedDate DateTime?
+  startDate    DateTime?
+  endDate      DateTime?
+  purpose      String
+  collateral   String?
+  guarantor    String?
+  monthlyPayment Decimal? @db.Decimal(10, 2)
+  totalPaid    Decimal    @default(0) @db.Decimal(10, 2)
+  balance      Decimal    @db.Decimal(10, 2)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  // Relations
+  member     Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  repayments LoanPayment[]
+
+  @@map("loans")
+}
+
+model LoanPayment {
+  id          String        @id @default(cuid())
+  loanId      String
+  amount      Decimal       @db.Decimal(10, 2)
+  principal   Decimal       @db.Decimal(10, 2)
+  interest    Decimal       @db.Decimal(10, 2)
+  paymentDate DateTime
+  method      PaymentMethod
+  reference   String        @unique
+  status      PaymentStatus @default(COMPLETED)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  loan Loan @relation(fields: [loanId], references: [id], onDelete: Cascade)
+
+  @@map("loan_payments")
+}
+
+model Saving {
+  id            String      @id @default(cuid())
+  memberId      String
+  accountNumber String      @unique
+  accountType   SavingType  @default(REGULAR)
+  balance       Decimal     @default(0) @db.Decimal(10, 2)
+  interestRate  Decimal     @db.Decimal(5, 2) // Changed from (5,4) to (5,2) to allow rates like 25.50%
+  status        SavingStatus @default(ACTIVE)
+  openedDate    DateTime    @default(now())
+  closedDate    DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  member       Member             @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  transactions SavingTransaction[]
+
+  @@map("savings")
+}
+
+model SavingTransaction {
+  id          String              @id @default(cuid())
+  savingId    String
+  type        SavingTransactionType
+  amount      Decimal             @db.Decimal(10, 2)
+  balance     Decimal             @db.Decimal(10, 2)
+  method      PaymentMethod
+  reference   String              @unique
+  description String?
+  status      TransactionStatus   @default(COMPLETED)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  // Relations
+  saving Saving @relation(fields: [savingId], references: [id], onDelete: Cascade)
+
+  @@map("saving_transactions")
+}
+
+model Transaction {
+  id          String            @id @default(cuid())
+  memberId    String?
+  type        TransactionType
+  category    String
+  amount      Decimal           @db.Decimal(10, 2)
+  description String
+  method      PaymentMethod
+  reference   String            @unique
+  status      TransactionStatus @default(COMPLETED)
+  date        DateTime          @default(now())
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // Relations
+  member Member? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  @@map("transactions")
+}
+
+// System Configuration
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+  type  String // STRING, NUMBER, BOOLEAN, JSON
+  group String // GENERAL, FINANCIAL, NOTIFICATION, etc.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+model Conversation {
+  id          String   @id @default(cuid())
+  type        String   // 'direct' or 'group'
+  name        String?
+  avatar      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+model ConversationParticipant {
+  id             String   @id @default(cuid())
+  conversationId String
+  memberId       String
+  role          String?  // 'ADMIN', 'MODERATOR', 'MEMBER'
+  joinedAt      DateTime @default(now())
+  
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  member       Member      @relation(fields: [memberId], references: [id])
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  senderId       String
+  content        String
+  type          String   @default("text") // 'text', 'image', 'file'
+  status        String   @default("sent") // 'sent', 'delivered', 'read'
+  createdAt     DateTime @default(now())
+  
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  sender       Member      @relation(fields: [senderId], references: [id])
+}
+
+// Enums
+enum UserRole {
+  ADMIN
+  MANAGER
+  MEMBER
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum ContributionType {
+  MONTHLY
+  SPECIAL
+  EMERGENCY
+  PENALTY
+}
+
+enum ContributionStatus {
+  PENDING
+  COMPLETED
+  OVERDUE
+  CANCELLED
+}
+
+enum LoanStatus {
+  PENDING
+  APPROVED
+  ACTIVE
+  COMPLETED
+  REJECTED
+  DEFAULTED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  MOBILE_MONEY
+  CREDIT_CARD
+  DEBIT_CARD
+  CHEQUE
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum SavingType {
+  REGULAR
+  FIXED_DEPOSIT
+  TARGET
+  EMERGENCY
+}
+
+enum SavingStatus {
+  ACTIVE
+  INACTIVE
+  CLOSED
+}
+
+enum SavingTransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  INTEREST
+  PENALTY
+  TRANSFER
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// Profile Enums
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+  SEPARATED
+}
+
+enum PreferredCommunication {
+  EMAIL
+  SMS
+  PHONE
+  WHATSAPP
+  IN_PERSON
+}
+
+enum DocumentType {
+  NATIONAL_ID
+  DRIVERS_LICENSE
+  PASSPORT
+  VOTERS_CARD
+  BIRTH_CERTIFICATE
+  UTILITY_BILL
+  BANK_STATEMENT
+  EMPLOYMENT_LETTER
+  SALARY_SLIP
+  TAX_CERTIFICATE
+  BVN_SLIP
+  PASSPORT_PHOTO
+  SIGNATURE_SPECIMEN
+  OTHER
+}
+
+enum DocumentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+  REQUIRES_UPDATE
+}
+
+// Payout System Enums
+enum PayoutType {
+  DIVIDEND
+  REFUND
+  LOAN_DISBURSEMENT
+  SAVINGS_WITHDRAWAL
+  EMERGENCY_ASSISTANCE
+  WELFARE_PAYMENT
+  BONUS
+  COMMISSION
+  EXPENSE_REIMBURSEMENT
+  OTHER
+}
+
+enum PayoutCategory {
+  MEMBER_BENEFIT
+  OPERATIONAL
+  EMERGENCY
+  STATUTORY
+  VOLUNTARY
+}
+
+enum PayoutStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PROCESSING
+  COMPLETED
+  CANCELLED
+  FAILED
+  ON_HOLD
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REQUIRES_CHANGES
+}
+
+// Streak System Enums
+enum StreakType {
+  LOGIN
+  CONTRIBUTION
+  SAVINGS
+  LOAN_PAYMENT
+  MEETING_ATTENDANCE
+  PROFILE_UPDATE
+  TRANSACTION
+  COMMUNITY_ENGAGEMENT
+}
+
+enum AchievementType {
+  STREAK_MILESTONE
+  TOTAL_CONTRIBUTION
+  PERFECT_ATTENDANCE
+  EARLY_ADOPTER
+  COMMUNITY_CHAMPION
+  FINANCIAL_DISCIPLINE
+  LOYALTY_BADGE
+  SPECIAL_EVENT
+}
+
+enum LeaderboardPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+  ALL_TIME
+}
+
+// Cooperative Settings Model
+model CooperativeSettings {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Organization Settings
+  organizationName        String  @default("Adashe Cooperative")
+  registrationNumber      String?
+  address                 String?
+  phone                   String?
+  email                   String?
+  website                 String?
+  establishedDate         DateTime?
+  description             String?
+
+  // Financial Settings
+  currency                String  @default("NGN")
+  minimumSavingsBalance   Float   @default(1000.0)
+  monthlyContribution     Float   @default(5000.0)
+  loanInterestRate        Float   @default(5.0)
+  maxLoanAmount           Float   @default(500000.0)
+  loanTerm                Int     @default(12) // months
+  lateFeeAmount           Float   @default(100.0)
+  withdrawalFee           Float   @default(50.0)
+
+  // System Settings
+  allowAutoLoans          Boolean @default(true)
+  requireLoanGuarantors   Boolean @default(false)
+  maxGuarantors           Int     @default(2)
+  autoCalculateInterest   Boolean @default(true)
+  allowEarlyLoanPayment   Boolean @default(true)
+  enableMemberSelfService Boolean @default(true)
+  maxSavingsWithdrawal    Float   @default(100000.0)
+
+  // Notification Settings
+  emailNotifications      Boolean @default(true)
+  smsNotifications        Boolean @default(false)
+  reminderDaysBefore      Int     @default(3)
+  notifyLoanDue           Boolean @default(true)
+  notifyPaymentReceived   Boolean @default(true)
+  notifyContributionDue   Boolean @default(true)
+  
+  @@map("cooperative_settings")
+}
+
+// Streak System Models
+model MemberStreak {
+  id               String      @id @default(cuid())
+  memberId         String
+  type             StreakType
+  currentStreak    Int         @default(0)
+  longestStreak    Int         @default(0)
+  lastActivityDate DateTime?
+  startDate        DateTime?   // When current streak started
+  endDate          DateTime?   // When streak was broken (if applicable)
+  isActive         Boolean     @default(true)
+  totalPoints      Int         @default(0)
+  level            Int         @default(1)
+  
+  // Metadata for streak-specific data
+  metadata         Json?       // Additional streak data (e.g., amounts, goals)
+  
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  // Relations
+  member           Member      @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  activities       StreakActivity[]
+  achievements     StreakAchievement[]
+
+  @@unique([memberId, type])
+  @@map("member_streaks")
+}
+
+model StreakActivity {
+  id               String       @id @default(cuid())
+  streakId         String
+  memberId         String
+  activityType     StreakType
+  activityDate     DateTime
+  points           Int          @default(1)
+  description      String?
+  
+  // Activity specific data
+  amount           Decimal?     @db.Decimal(10, 2) // For contribution/savings streaks
+  reference        String?      // Reference to related transaction/record
+  metadata         Json?        // Additional activity data
+  
+  createdAt        DateTime     @default(now())
+
+  // Relations
+  streak           MemberStreak @relation(fields: [streakId], references: [id], onDelete: Cascade)
+  member           Member       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId, activityDate])
+  @@index([streakId, activityDate])
+  @@map("streak_activities")
+}
+
+model StreakAchievement {
+  id               String       @id @default(cuid())
+  streakId         String
+  memberId         String
+  achievementType  AchievementType
+  title            String
+  description      String
+  badgeIcon        String?      // Icon for the achievement badge
+  pointsAwarded    Int          @default(0)
+  achievedAt       DateTime     @default(now())
+  
+  // Achievement criteria met
+  streakCount      Int?         // Streak length achieved
+  totalAmount      Decimal?     @db.Decimal(10, 2) // Total amount for financial achievements
+  
+  createdAt        DateTime     @default(now())
+
+  // Relations
+  streak           MemberStreak @relation(fields: [streakId], references: [id], onDelete: Cascade)
+  member           Member       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@map("streak_achievements")
+}
+
+model StreakLeaderboard {
+  id               String       @id @default(cuid())
+  memberId         String
+  streakType       StreakType
+  currentStreak    Int
+  longestStreak    Int
+  totalPoints      Int
+  rank             Int
+  period           LeaderboardPeriod @default(ALL_TIME)
+  periodStart      DateTime?
+  periodEnd        DateTime?
+  
+  updatedAt        DateTime     @updatedAt
+  createdAt        DateTime     @default(now())
+
+  // Relations
+  member           Member       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, streakType, period])
+  @@index([streakType, period, rank])
+  @@map("streak_leaderboards")
+}
+
+// Payment System Models
+model Payment {
+  id                String            @id @default(cuid())
+  memberId          String?
+  amount            Decimal           @db.Decimal(10, 2)
+  currency          String            @default("NGN")
+  description       String
+  reference         String            @unique
+  paystackReference String?           @unique
+  
+  // Payment Details
+  email             String
+  status            PaymentStatus     @default(PENDING)
+  gateway           String            @default("paystack")
+  channel           String?           // card, bank, ussd, qr, mobile_money
+  
+  // Paystack Response Data
+  authorization     Json?             // Authorization details from Paystack
+  customer          Json?             // Customer details from Paystack
+  gatewayResponse   String?
+  paidAt            DateTime?
+  
+  // Internal Processing
+  processedAt       DateTime?
+  verifiedAt        DateTime?
+  
+  // Relations
+  type              PaymentType
+  category          String?           // contribution, savings, loan_repayment, etc.
+  
+  // Metadata
+  metadata          Json?             // Additional payment data
+  fees              Decimal?          @db.Decimal(10, 2)
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  // Relations
+  member            Member?           @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  transactions      PaymentTransaction[]
+
+  @@map("payments")
+}
+
+model PaymentTransaction {
+  id                String            @id @default(cuid())
+  paymentId         String
+  transactionId     String?           // Related transaction (contribution, savings, etc.)
+  transactionType   String            // contribution, savings_deposit, loan_payment, etc.
+  
+  amount            Decimal           @db.Decimal(10, 2)
+  status            TransactionStatus @default(PENDING)
+  processedAt       DateTime?
+  
+  // Error handling
+  errorMessage      String?
+  retryCount        Int               @default(0)
+  maxRetries        Int               @default(3)
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  // Relations
+  payment           Payment           @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@map("payment_transactions")
+}
+
+model PayoutRequest {
+  id                String            @id @default(cuid())
+  memberId          String
+  amount            Decimal           @db.Decimal(10, 2)
+  currency          String            @default("NGN")
+  description       String
+  reason            String?
+  
+  // Bank Details
+  accountName       String
+  accountNumber     String
+  bankCode          String
+  bankName          String
+  
+  // Paystack Details
+  recipientCode     String?           // Paystack transfer recipient code
+  transferCode      String?           // Paystack transfer code
+  paystackReference String?           @unique
+  
+  // Status and Processing
+  status            PayoutStatus      @default(PENDING)
+  reference         String            @unique
+  requestedBy       String            // User ID who requested
+  approvedBy        String?           // User ID who approved
+  processedBy       String?           // User ID who processed
+  
+  // Dates
+  requestDate       DateTime          @default(now())
+  approvedDate      DateTime?
+  processedDate     DateTime?
+  completedDate     DateTime?
+  
+  // Approval System
+  requiresApproval  Boolean           @default(true)
+  approvalLevel     Int               @default(1)
+  approvals         PayoutApproval[]
+  
+  // Error handling
+  errorMessage      String?
+  retryCount        Int               @default(0)
+  maxRetries        Int               @default(3)
+  
+  // Metadata
+  metadata          Json?
+  fees              Decimal?          @db.Decimal(10, 2)
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  // Relations
+  member            Member            @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@map("payout_requests")
+}
+
+model Bank {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique
+  slug      String?
+  country   String   @default("nigeria")
+  currency  String   @default("NGN")
+  type      String?  // commercial, microfinance, etc.
+  isActive  Boolean  @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("banks")
+}
+
+// Additional Payment Enums
+enum PaymentType {
+  CONTRIBUTION
+  SAVINGS_DEPOSIT
+  LOAN_REPAYMENT
+  REGISTRATION_FEE
+  SERVICE_FEE
+  PENALTY_PAYMENT
+  OTHER
+}

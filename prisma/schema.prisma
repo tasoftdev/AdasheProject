@@ -280,8 +280,8 @@ model Loan {
   id           String     @id @default(cuid())
   memberId     String
   amount       Decimal    @db.Decimal(10, 2)
-  interestRate Decimal    @db.Decimal(5, 2) // Changed from (5,4) to (5,2) to allow rates like 25.50%
-  term         Int // in months
+  interestRate Decimal    @db.Decimal(5, 2) 
+  term         Int 
   status       LoanStatus @default(PENDING)
   appliedDate  DateTime   @default(now())
   approvedDate DateTime?
